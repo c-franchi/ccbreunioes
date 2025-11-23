@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Plus, CheckCircle2 } from "lucide-react";
+import { Search, Plus, CheckCircle2, Mic, MicOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { AddMusicianDialog } from "./AddMusicianDialog";
+import { normalizeText } from "@/lib/utils";
 
 interface MusicianSearchProps {
   currentSessionId: string | undefined;
@@ -18,6 +19,8 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
   const [musicians, setMusicians] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (searchTerm.length < 2) {
@@ -29,14 +32,17 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
       setLoading(true);
       const { data, error } = await supabase
         .from('musicians')
-        .select('*')
-        .ilike('name', `%${searchTerm}%`)
-        .limit(10);
+        .select('*');
 
       if (error) {
         console.error(error);
+        setMusicians([]);
       } else {
-        setMusicians(data || []);
+        const normalizedSearch = normalizeText(searchTerm);
+        const filtered = (data || []).filter((musician) =>
+          normalizeText(musician.name).includes(normalizedSearch)
+        );
+        setMusicians(filtered.slice(0, 10));
       }
       setLoading(false);
     };
@@ -44,6 +50,53 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
     const debounce = setTimeout(searchMusicians, 300);
     return () => clearTimeout(debounce);
   }, [searchTerm]);
+
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'pt-BR';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchTerm(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = () => {
+        toast.error("Erro ao reconhecer voz");
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleVoiceSearch = () => {
+    if (!recognitionRef.current) {
+      toast.error("Busca por voz não disponível neste navegador");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+      toast.info("Escutando...");
+    }
+  };
 
   const isAlreadyPresent = (musicianId: string) => {
     return attendances.some(att => att.musician_id === musicianId);
@@ -86,16 +139,25 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
-                placeholder="Digite o nome do músico..."
+                placeholder="Digite ou fale o nome do músico..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
             <Button 
+              variant={isListening ? "default" : "secondary"}
+              size="icon"
+              onClick={toggleVoiceSearch}
+              title="Buscar por voz"
+            >
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            </Button>
+            <Button 
               variant="secondary" 
               size="icon"
               onClick={() => setShowAddDialog(true)}
+              title="Adicionar músico"
             >
               <Plus className="w-5 h-5" />
             </Button>

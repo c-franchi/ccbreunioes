@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar, Plus, CheckCircle2, XCircle } from "lucide-react";
@@ -19,6 +20,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newEventName, setNewEventName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionToClose, setSessionToClose] = useState<string | null>(null);
 
   useEffect(() => {
     loadOpenSessions();
@@ -72,11 +74,13 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     setLoading(false);
   };
 
-  const closeEvent = async (sessionId: string) => {
+  const closeEvent = async () => {
+    if (!sessionToClose) return;
+
     const { error } = await supabase
       .from('meeting_sessions')
       .update({ status: 'encerrado' })
-      .eq('id', sessionId);
+      .eq('id', sessionToClose);
 
     if (error) {
       toast.error("Erro ao encerrar evento");
@@ -84,10 +88,11 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     } else {
       toast.success("Evento encerrado com sucesso!");
       loadOpenSessions();
-      if (currentSession?.id === sessionId) {
+      if (currentSession?.id === sessionToClose) {
         onSessionChange(null);
       }
     }
+    setSessionToClose(null);
   };
 
   return (
@@ -173,7 +178,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => closeEvent(session.id)}
+                        onClick={() => setSessionToClose(session.id)}
                         className="flex-shrink-0"
                       >
                         <XCircle className="w-4 h-4 mr-2" />
@@ -187,6 +192,23 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
           </div>
         )}
       </CardContent>
+
+      <AlertDialog open={!!sessionToClose} onOpenChange={() => setSessionToClose(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Encerramento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja encerrar este evento? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={closeEvent}>
+              Sim, Encerrar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
