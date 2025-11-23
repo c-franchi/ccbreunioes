@@ -2,6 +2,7 @@ interface EventData {
   meeting_name: string;
   meeting_date: string;
   cidade?: string;
+  tipo_contagem?: string;
 }
 
 interface AttendanceData {
@@ -13,23 +14,93 @@ interface AttendanceData {
   };
 }
 
+const INSTRUMENT_GROUPS: Record<string, string[]> = {
+  Cordas: ['Violino', 'Viola', 'Violoncelo'],
+  Madeiras: [
+    'Flauta', 'Oboé', "Oboé D'Amore", 'Corne Inglês',
+    'Clarinete', 'Clarinete Alto', 'Clarinete Baixo', 'Fagote',
+    'Saxofone Soprano', 'Saxofone Alto', 'Saxofone Tenor', 'Saxofone Baritono'
+  ],
+  Metais: [
+    'Trompete / Cornet', 'Flugelhom', 'Trompa',
+    'Trombone / Trombonito', 'Baritono', 'Eufônio', 'Tuba', 'Acordeon'
+  ],
+  Outros: ['Não Incluído no MOD']
+};
+
+const normalize = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const findInstrumentGroup = (instrument: string): string => {
+  const normInstrument = normalize(instrument);
+  for (const [group, instruments] of Object.entries(INSTRUMENT_GROUPS)) {
+    const matchedInstrument = instruments.find((i) => {
+      const normI = normalize(i);
+      return (
+        normInstrument === normI ||
+        normInstrument.startsWith(normI + ' ') ||
+        normI.startsWith(normInstrument + ' ')
+      );
+    });
+    if (matchedInstrument) return group;
+  }
+  return 'Outros';
+};
+
 export const generateEventCSV = (eventData: EventData, attendances: AttendanceData[]) => {
-  // CSV Headers
-  const headers = ['Nome', 'Instrumento', 'Cargo/Ministério', 'Localidade'];
+  const tipoContagem = eventData.tipo_contagem || 'instrumento';
   
-  // CSV Rows
-  const rows = attendances.map(att => [
-    att.musician.name,
-    att.musician.instrument,
-    att.musician.cargo_ministerio || '',
-    att.musician.localidade || ''
-  ]);
+  let csvContent: string;
   
-  // Build CSV content
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-  ].join('\n');
+  if (tipoContagem === 'naipe') {
+    // Group by naipe
+    const grouped: Record<string, AttendanceData[]> = {};
+    attendances.forEach(att => {
+      const group = findInstrumentGroup(att.musician.instrument);
+      if (!grouped[group]) grouped[group] = [];
+      grouped[group].push(att);
+    });
+    
+    const headers = ['Naipe', 'Nome', 'Instrumento', 'Cargo/Ministério', 'Localidade'];
+    const rows: string[][] = [];
+    
+    Object.entries(grouped).forEach(([naipe, members]) => {
+      members.forEach(att => {
+        rows.push([
+          naipe,
+          att.musician.name,
+          att.musician.instrument,
+          att.musician.cargo_ministerio || '',
+          att.musician.localidade || ''
+        ]);
+      });
+    });
+    
+    csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+  } else {
+    // Individual instrument counting
+    const headers = ['Nome', 'Instrumento', 'Cargo/Ministério', 'Localidade'];
+    
+    const rows = attendances.map(att => [
+      att.musician.name,
+      att.musician.instrument,
+      att.musician.cargo_ministerio || '',
+      att.musician.localidade || ''
+    ]);
+    
+    csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+  }
   
   // Create blob and download
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
