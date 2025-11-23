@@ -66,6 +66,14 @@ export type Database = {
           id: string
           meeting_date: string
           meeting_name: string | null
+          ministerio_administracao: number | null
+          ministerio_anciaes: number | null
+          ministerio_coop_jovens: number | null
+          ministerio_cooperadores: number | null
+          ministerio_diaconos: number | null
+          ministerio_enc_locais: number | null
+          ministerio_enc_regionais: number | null
+          ministerio_examinadoras: number | null
           observacao: string | null
           palavra: string | null
           quantidade_organistas: number | null
@@ -85,6 +93,14 @@ export type Database = {
           id?: string
           meeting_date?: string
           meeting_name?: string | null
+          ministerio_administracao?: number | null
+          ministerio_anciaes?: number | null
+          ministerio_coop_jovens?: number | null
+          ministerio_cooperadores?: number | null
+          ministerio_diaconos?: number | null
+          ministerio_enc_locais?: number | null
+          ministerio_enc_regionais?: number | null
+          ministerio_examinadoras?: number | null
           observacao?: string | null
           palavra?: string | null
           quantidade_organistas?: number | null
@@ -104,6 +120,14 @@ export type Database = {
           id?: string
           meeting_date?: string
           meeting_name?: string | null
+          ministerio_administracao?: number | null
+          ministerio_anciaes?: number | null
+          ministerio_coop_jovens?: number | null
+          ministerio_cooperadores?: number | null
+          ministerio_diaconos?: number | null
+          ministerio_enc_locais?: number | null
+          ministerio_enc_regionais?: number | null
+          ministerio_examinadoras?: number | null
           observacao?: string | null
           palavra?: string | null
           quantidade_organistas?: number | null
