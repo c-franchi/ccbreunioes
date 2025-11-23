@@ -36,7 +36,15 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     hinos_cantados: "",
     hinos_ensaiados: "",
     quantidade_organistas: 0,
-    cidade: ""
+    cidade: "",
+    ministerio_anciaes: 0,
+    ministerio_diaconos: 0,
+    ministerio_cooperadores: 0,
+    ministerio_coop_jovens: 0,
+    ministerio_enc_regionais: 0,
+    ministerio_enc_locais: 0,
+    ministerio_examinadoras: 0,
+    ministerio_administracao: 0
   });
   const [loading, setLoading] = useState(false);
   const [sessionToClose, setSessionToClose] = useState<string | null>(null);
@@ -119,7 +127,15 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
         hinos_cantados: "",
         hinos_ensaiados: "",
         quantidade_organistas: 0,
-        cidade: ""
+        cidade: "",
+        ministerio_anciaes: 0,
+        ministerio_diaconos: 0,
+        ministerio_cooperadores: 0,
+        ministerio_coop_jovens: 0,
+        ministerio_enc_regionais: 0,
+        ministerio_enc_locais: 0,
+        ministerio_examinadoras: 0,
+        ministerio_administracao: 0
       });
       setShowCreateDialog(false);
       loadOpenSessions();
@@ -410,6 +426,100 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                       value={newEventData.quantidade_organistas}
                       onChange={(e) => setNewEventData({...newEventData, quantidade_organistas: parseInt(e.target.value) || 0})}
                     />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Ministério Presente</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="ministerio_anciaes" className="text-xs">Anciães</Label>
+                      <Input
+                        id="ministerio_anciaes"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={newEventData.ministerio_anciaes}
+                        onChange={(e) => setNewEventData({...newEventData, ministerio_anciaes: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="ministerio_diaconos" className="text-xs">Diáconos</Label>
+                      <Input
+                        id="ministerio_diaconos"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={newEventData.ministerio_diaconos}
+                        onChange={(e) => setNewEventData({...newEventData, ministerio_diaconos: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="ministerio_cooperadores" className="text-xs">Cooperadores</Label>
+                      <Input
+                        id="ministerio_cooperadores"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={newEventData.ministerio_cooperadores}
+                        onChange={(e) => setNewEventData({...newEventData, ministerio_cooperadores: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="ministerio_coop_jovens" className="text-xs">Coop. Jovens</Label>
+                      <Input
+                        id="ministerio_coop_jovens"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={newEventData.ministerio_coop_jovens}
+                        onChange={(e) => setNewEventData({...newEventData, ministerio_coop_jovens: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="ministerio_enc_regionais" className="text-xs">Enc. Regionais</Label>
+                      <Input
+                        id="ministerio_enc_regionais"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={newEventData.ministerio_enc_regionais}
+                        onChange={(e) => setNewEventData({...newEventData, ministerio_enc_regionais: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="ministerio_enc_locais" className="text-xs">Enc. Locais</Label>
+                      <Input
+                        id="ministerio_enc_locais"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={newEventData.ministerio_enc_locais}
+                        onChange={(e) => setNewEventData({...newEventData, ministerio_enc_locais: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="ministerio_examinadoras" className="text-xs">Examinadoras</Label>
+                      <Input
+                        id="ministerio_examinadoras"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={newEventData.ministerio_examinadoras}
+                        onChange={(e) => setNewEventData({...newEventData, ministerio_examinadoras: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="ministerio_administracao" className="text-xs">Administração</Label>
+                      <Input
+                        id="ministerio_administracao"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={newEventData.ministerio_administracao}
+                        onChange={(e) => setNewEventData({...newEventData, ministerio_administracao: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
                   </div>
                 </div>
                 
@@ -755,6 +865,100 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                     value={editingSession.quantidade_organistas || 0}
                     onChange={(e) => setEditingSession({...editingSession, quantidade_organistas: parseInt(e.target.value) || 0})}
                   />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">Ministério Presente</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="edit_ministerio_anciaes" className="text-xs">Anciães</Label>
+                    <Input
+                      id="edit_ministerio_anciaes"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={editingSession.ministerio_anciaes || 0}
+                      onChange={(e) => setEditingSession({...editingSession, ministerio_anciaes: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit_ministerio_diaconos" className="text-xs">Diáconos</Label>
+                    <Input
+                      id="edit_ministerio_diaconos"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={editingSession.ministerio_diaconos || 0}
+                      onChange={(e) => setEditingSession({...editingSession, ministerio_diaconos: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit_ministerio_cooperadores" className="text-xs">Cooperadores</Label>
+                    <Input
+                      id="edit_ministerio_cooperadores"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={editingSession.ministerio_cooperadores || 0}
+                      onChange={(e) => setEditingSession({...editingSession, ministerio_cooperadores: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit_ministerio_coop_jovens" className="text-xs">Coop. Jovens</Label>
+                    <Input
+                      id="edit_ministerio_coop_jovens"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={editingSession.ministerio_coop_jovens || 0}
+                      onChange={(e) => setEditingSession({...editingSession, ministerio_coop_jovens: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit_ministerio_enc_regionais" className="text-xs">Enc. Regionais</Label>
+                    <Input
+                      id="edit_ministerio_enc_regionais"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={editingSession.ministerio_enc_regionais || 0}
+                      onChange={(e) => setEditingSession({...editingSession, ministerio_enc_regionais: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit_ministerio_enc_locais" className="text-xs">Enc. Locais</Label>
+                    <Input
+                      id="edit_ministerio_enc_locais"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={editingSession.ministerio_enc_locais || 0}
+                      onChange={(e) => setEditingSession({...editingSession, ministerio_enc_locais: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit_ministerio_examinadoras" className="text-xs">Examinadoras</Label>
+                    <Input
+                      id="edit_ministerio_examinadoras"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={editingSession.ministerio_examinadoras || 0}
+                      onChange={(e) => setEditingSession({...editingSession, ministerio_examinadoras: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit_ministerio_administracao" className="text-xs">Administração</Label>
+                    <Input
+                      id="edit_ministerio_administracao"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={editingSession.ministerio_administracao || 0}
+                      onChange={(e) => setEditingSession({...editingSession, ministerio_administracao: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
                 </div>
               </div>
               
