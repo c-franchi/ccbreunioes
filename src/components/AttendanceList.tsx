@@ -14,10 +14,25 @@ import {
 interface AttendanceListProps {
   attendances: any[];
   sessionId: string | undefined;
+  tipoContagem?: string;
 }
 
-export const AttendanceList = ({ attendances, sessionId }: AttendanceListProps) => {
-  const handleRemove = async (attendanceId: string, musicianName: string) => {
+const INSTRUMENT_GROUPS = {
+  Cordas: ['Violino', 'Viola', 'Violoncelo'],
+  Madeiras: [
+    'Flauta', 'Oboé', "Oboé D'Amore", 'Corne Inglês',
+    'Clarinete', 'Clarinete Alto', 'Clarinete Baixo', 'Fagote',
+    'Saxofone Soprano', 'Saxofone Alto', 'Saxofone Tenor', 'Saxofone Baritono'
+  ],
+  Metais: [
+    'Trompete / Cornet', 'Flugelhom', 'Trompa',
+    'Trombone / Trombonito', 'Baritono', 'Eufônio', 'Tuba', 'Acordeon'
+  ],
+  Outros: ['Não Incluído no MOD']
+};
+
+export const AttendanceList = ({ attendances, sessionId, tipoContagem = 'instrumento' }: AttendanceListProps) => {
+  const handleRemove = async (attendanceId: string, itemName: string) => {
     const { error } = await supabase
       .from('attendances')
       .delete()
@@ -27,8 +42,33 @@ export const AttendanceList = ({ attendances, sessionId }: AttendanceListProps) 
       toast.error("Erro ao remover presença");
       console.error(error);
     } else {
-      toast.success(`Presença removida: ${musicianName}`);
+      toast.success(`Presença removida: ${itemName}`);
     }
+  };
+
+  const groupAttendancesByNaipe = () => {
+    const grouped: Record<string, any[]> = {};
+    
+    attendances.forEach(attendance => {
+      const instrument = attendance.instrument || attendance.musicians?.instrument || 'Outros';
+      
+      let naipeFound = false;
+      for (const [naipe, instruments] of Object.entries(INSTRUMENT_GROUPS)) {
+        if (instruments.some(inst => instrument.toLowerCase().includes(inst.toLowerCase()))) {
+          if (!grouped[naipe]) grouped[naipe] = [];
+          grouped[naipe].push(attendance);
+          naipeFound = true;
+          break;
+        }
+      }
+      
+      if (!naipeFound) {
+        if (!grouped['Outros']) grouped['Outros'] = [];
+        grouped['Outros'].push(attendance);
+      }
+    });
+    
+    return grouped;
   };
 
   return (
@@ -49,67 +89,68 @@ export const AttendanceList = ({ attendances, sessionId }: AttendanceListProps) 
               </p>
             </div>
           ) : (
-            <Accordion type="single" collapsible className="w-full">
-              {Array.from({ length: Math.ceil(attendances.length / 4) }, (_, groupIndex) => {
-                const groupAttendances = attendances.slice(groupIndex * 4, (groupIndex + 1) * 4);
-                const groupNames = groupAttendances.map(a => a.musicians.name.split(' ')[0]).join(', ');
-                
-                return (
-                  <AccordionItem key={`group-${groupIndex}`} value={`group-${groupIndex}`}>
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-primary" />
-                        <span className="font-medium">Grupo {groupIndex + 1}</span>
-                        <Badge variant="secondary">{groupAttendances.length}</Badge>
-                        <span className="text-sm text-muted-foreground ml-2">
-                          {groupNames}
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2 pt-2">
-                        {groupAttendances.map((attendance) => {
-                          const musician = attendance.musicians;
-                          return (
-                            <Card key={attendance.id} className="hover:bg-accent/50 transition-colors">
-                              <CardContent className="p-4">
-                                <div className="flex items-start justify-between">
-                                  <div className="space-y-1 flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                                      <h3 className="font-semibold">{musician.name}</h3>
-                                    </div>
-                                    <div className="flex gap-2 flex-wrap ml-6">
-                                      <Badge variant="secondary">{musician.instrument}</Badge>
-                                      {musician.cargo_ministerio && (
-                                        <Badge variant="outline">{musician.cargo_ministerio}</Badge>
-                                      )}
-                                    </div>
-                                    <p className="text-sm text-muted-foreground ml-6">
-                                      {musician.localidade}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground ml-6">
-                                      Confirmado às {new Date(attendance.checked_in_at).toLocaleTimeString('pt-BR')}
-                                    </p>
+            <Accordion type="multiple" className="w-full">
+              {Object.entries(groupAttendancesByNaipe()).map(([naipe, naipeAttendances]) => (
+                <AccordionItem key={naipe} value={naipe}>
+                  <AccordionTrigger className="hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-primary" />
+                      <span className="font-medium">{naipe}</span>
+                      <Badge variant="secondary">{naipeAttendances.length}</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2 pt-2">
+                      {naipeAttendances.map((attendance) => {
+                        // Verifica se é contagem sem nome ou com músico
+                        const isCount = !attendance.musician_id && attendance.instrument;
+                        const musician = attendance.musicians;
+                        const displayName = isCount ? attendance.instrument : musician?.name;
+                        const instrument = isCount ? attendance.instrument : musician?.instrument;
+                        
+                        return (
+                          <Card key={attendance.id} className="hover:bg-accent/50 transition-colors">
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="space-y-1 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                                    <h3 className="font-semibold">{displayName}</h3>
                                   </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleRemove(attendance.id, musician.name)}
-                                    className="flex-shrink-0"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
+                                  {!isCount && (
+                                    <>
+                                      <div className="flex gap-2 flex-wrap ml-6">
+                                        <Badge variant="secondary">{instrument}</Badge>
+                                        {musician?.cargo_ministerio && (
+                                          <Badge variant="outline">{musician.cargo_ministerio}</Badge>
+                                        )}
+                                      </div>
+                                      <p className="text-sm text-muted-foreground ml-6">
+                                        {musician?.localidade}
+                                      </p>
+                                    </>
+                                  )}
+                                  <p className="text-xs text-muted-foreground ml-6">
+                                    Confirmado às {new Date(attendance.checked_in_at).toLocaleTimeString('pt-BR')}
+                                  </p>
                                 </div>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                );
-              })}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleRemove(attendance.id, displayName)}
+                                  className="flex-shrink-0"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
             </Accordion>
           )}
         </div>

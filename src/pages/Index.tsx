@@ -6,6 +6,7 @@ import { AttendanceStats } from "@/components/AttendanceStats";
 import { AttendanceList } from "@/components/AttendanceList";
 import { EventManager } from "@/components/EventManager";
 import { GroupAttendanceMarker } from "@/components/GroupAttendanceMarker";
+import { InstrumentCountMarker } from "@/components/InstrumentCountMarker";
 const Index = () => {
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [attendances, setAttendances] = useState<any[]>([]);
@@ -98,8 +99,16 @@ const Index = () => {
               />
             )}
             
+            {currentSession && currentSession.tipo_presenca === 'sem_nome' && (
+              <InstrumentCountMarker 
+                currentSessionId={currentSession.id} 
+                attendances={attendances}
+                tipoContagem={currentSession.tipo_contagem || 'instrumento'}
+              />
+            )}
+            
             {/* Attendance List */}
-            {currentSession && <AttendanceList attendances={attendances} sessionId={currentSession?.id} />}
+            {currentSession && <AttendanceList attendances={attendances} sessionId={currentSession?.id} tipoContagem={currentSession.tipo_contagem || 'instrumento'} />}
           </div>
 
           {/* Stats Sidebar */}
