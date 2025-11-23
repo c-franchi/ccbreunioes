@@ -61,12 +61,12 @@ const Index = () => {
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-primary text-primary-foreground shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <Music className="w-8 h-8" />
-            <div>
-              <h1 className="text-3xl font-bold">CCB Contagem Reuniões  </h1>
-              <p className="text-sm text-primary-foreground/80">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Music className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold truncate">CCB Contagem Reuniões</h1>
+              <p className="text-xs sm:text-sm text-primary-foreground/80 truncate">
                 Controle de Presenças - {currentSession?.meeting_name || 'Carregando...'}
               </p>
             </div>
@@ -74,10 +74,10 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6 lg:grid-cols-3">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           {/* Event Management and Search */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <EventManager currentSession={currentSession} onSessionChange={setCurrentSession} />
             
             {currentSession && <MusicianSearch currentSessionId={currentSession?.id} attendances={attendances} />}

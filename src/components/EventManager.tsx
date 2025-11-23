@@ -8,7 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Plus, XCircle, FileText, Edit } from "lucide-react";
+import { Calendar, Plus, XCircle, FileText, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateEventPDF } from "@/utils/generateEventPDF";
 
@@ -37,6 +37,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
   });
   const [loading, setLoading] = useState(false);
   const [sessionToClose, setSessionToClose] = useState<string | null>(null);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [editingSession, setEditingSession] = useState<any | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
@@ -201,6 +202,28 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
       }
     }
     setSessionToClose(null);
+  };
+
+  const deleteEvent = async () => {
+    if (!sessionToDelete) return;
+
+    const { error } = await supabase
+      .from('meeting_sessions')
+      .delete()
+      .eq('id', sessionToDelete);
+
+    if (error) {
+      toast.error("Erro ao excluir evento");
+      console.error(error);
+    } else {
+      toast.success("Evento excluído com sucesso!");
+      loadOpenSessions();
+      loadClosedSessions();
+      if (currentSession?.id === sessionToDelete) {
+        onSessionChange(null);
+      }
+    }
+    setSessionToDelete(null);
   };
 
   return (
@@ -391,50 +414,50 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                           : 'hover:bg-accent/50'
                       }`}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-2">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
                           <div 
-                            className="flex-1 cursor-pointer"
+                            className="flex-1 cursor-pointer min-w-0"
                             onClick={() => onSessionChange(session)}
                           >
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="font-semibold">{session.meeting_name}</p>
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <p className="font-semibold break-words">{session.meeting_name}</p>
                               {isActive && <Badge variant="default">Ativo</Badge>}
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR')}
+                            <p className="text-xs sm:text-sm text-muted-foreground">
+                              {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs sm:text-sm text-muted-foreground">
                               {attendanceCount} presença(s) confirmada(s)
                             </p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap w-full sm:w-auto">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleGeneratePDF(session)}
-                              className="flex-shrink-0"
+                              className="flex-shrink-0 text-xs sm:text-sm"
                             >
-                              <FileText className="w-4 h-4 mr-2" />
-                              PDF
+                              <FileText className="w-4 h-4 sm:mr-2" />
+                              <span className="hidden sm:inline">PDF</span>
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEditSession(session)}
-                              className="flex-shrink-0"
+                              className="flex-shrink-0 text-xs sm:text-sm"
                             >
-                              <Edit className="w-4 h-4 mr-2" />
-                              Editar
+                              <Edit className="w-4 h-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Editar</span>
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => setSessionToClose(session.id)}
-                              className="flex-shrink-0"
+                              className="flex-shrink-0 text-xs sm:text-sm"
                             >
-                              <XCircle className="w-4 h-4 mr-2" />
-                              Encerrar
+                              <XCircle className="w-4 h-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Encerrar</span>
                             </Button>
                           </div>
                         </div>
@@ -456,29 +479,38 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                       key={session.id}
                       className="opacity-75"
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="font-semibold">{session.meeting_name}</p>
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <p className="font-semibold break-words">{session.meeting_name}</p>
                               <Badge variant="secondary">Encerrado</Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR')}
+                            <p className="text-xs sm:text-sm text-muted-foreground">
+                              {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs sm:text-sm text-muted-foreground">
                               {attendanceCount} presença(s) confirmada(s)
                             </p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap w-full sm:w-auto">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleGeneratePDF(session)}
-                              className="flex-shrink-0"
+                              className="flex-shrink-0 text-xs sm:text-sm"
                             >
-                              <FileText className="w-4 h-4 mr-2" />
-                              PDF
+                              <FileText className="w-4 h-4 sm:mr-2" />
+                              <span className="hidden sm:inline">PDF</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSessionToDelete(session.id)}
+                              className="flex-shrink-0 text-xs sm:text-sm text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Excluir</span>
                             </Button>
                           </div>
                         </div>
@@ -504,6 +536,23 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={closeEvent}>
               Sim, Encerrar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!sessionToDelete} onOpenChange={() => setSessionToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este evento? Todos os dados de presença serão perdidos. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteEvent} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Sim, Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
