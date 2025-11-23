@@ -69,21 +69,38 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
   // Count instruments
   const instrumentCounts: Record<string, Record<string, number>> = {};
   
+  // função para normalizar (remove acentos, deixa maiúsculo e tira espaços extras)
+  const normalize = (s: string) =>
+    s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+
   attendances.forEach((att) => {
-    const instrument = att.musician.instrument;
-    
+    const rawInstrument = att.musician.instrument || '';
+    const normInstrument = normalize(rawInstrument);
+
     for (const [group, instruments] of Object.entries(INSTRUMENT_GROUPS)) {
-      const matchedInstrument = instruments.find(i => 
-        instrument === i || 
-        instrument.startsWith(i + ' ') ||
-        i.startsWith(instrument + ' ')
-      );
-      
+      const matchedInstrument = instruments.find((i) => {
+        const normI = normalize(i);
+        return (
+          normInstrument === normI ||
+          normInstrument.startsWith(normI + ' ') ||
+          normI.startsWith(normInstrument + ' ')
+        );
+      });
+
       if (matchedInstrument) {
         if (!instrumentCounts[group]) {
           instrumentCounts[group] = {};
         }
-        instrumentCounts[group][instrument] = (instrumentCounts[group][instrument] || 0) + 1;
+
+        // usa SEMPRE o nome do grupo (matchedInstrument) como chave,
+        // que é o mesmo nome usado na tabela
+        instrumentCounts[group][matchedInstrument] =
+          (instrumentCounts[group][matchedInstrument] || 0) + 1;
         break;
       }
     }
@@ -178,22 +195,33 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
       padding-left: 6px;
     }
 
+    .main-table {
+      border-collapse: collapse;
+    }
+
+    .main-table th,
+    .main-table td {
+      border: 1px solid #000;
+      font-size: 8px;
+    }
+
     .main-table th {
       background-color: #f0f0f0;
+      font-weight: bold;
       text-align: center;
-      font-size: 8px;
       padding: 3px 2px;
     }
-    .main-table td {
-      font-size: 8px;
-    }
+
     .naipe-cell {
       font-weight: bold;
       text-align: center;
+      vertical-align: middle;
     }
+
     .instrument-cell {
       padding-left: 6px;
     }
+
     .number-cell {
       text-align: center;
       font-weight: bold;
