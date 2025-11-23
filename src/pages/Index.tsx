@@ -14,7 +14,12 @@ const Index = () => {
 
   // Load attendances for current session
   useEffect(() => {
-    if (!currentSession) return;
+    if (!currentSession) {
+      setStats(null);
+      setAttendances([]);
+      return;
+    }
+    
     const loadAttendances = async () => {
       const {
         data,

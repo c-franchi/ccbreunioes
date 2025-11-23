@@ -57,6 +57,7 @@ export type Database = {
         Row: {
           anciao: string | null
           ancioes_presentes: string | null
+          cidade: string | null
           created_at: string | null
           demais_irmaos: string | null
           examinadora: string | null
@@ -75,6 +76,7 @@ export type Database = {
         Insert: {
           anciao?: string | null
           ancioes_presentes?: string | null
+          cidade?: string | null
           created_at?: string | null
           demais_irmaos?: string | null
           examinadora?: string | null
@@ -93,6 +95,7 @@ export type Database = {
         Update: {
           anciao?: string | null
           ancioes_presentes?: string | null
+          cidade?: string | null
           created_at?: string | null
           demais_irmaos?: string | null
           examinadora?: string | null

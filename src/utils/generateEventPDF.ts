@@ -15,6 +15,7 @@ interface EventData {
   hinos_cantados?: string;
   hinos_ensaiados?: string;
   quantidade_organistas?: number;
+  cidade?: string;
 }
 
 interface AttendanceData {
@@ -52,25 +53,21 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
   doc.setFontSize(10);
   doc.text('ENSAIO REGIONAL', pageWidth / 2, 16, { align: 'center' });
   
-  // Top section table with location and date
-  const locationParts = eventData.meeting_name?.split('-') || [];
-  const location = locationParts.length >= 2 ? locationParts[1].trim() : '';
-  const city = locationParts.length >= 3 ? locationParts[2].trim() : '';
+  // Top section table with city and date
+  const city = eventData.cidade || '';
   
   autoTable(doc, {
     startY: 20,
     head: [],
     body: [[
-      { content: location, styles: { halign: 'center', fontStyle: 'bold' } },
-      { content: city, styles: { halign: 'center', fontStyle: 'bold' } },
-      { content: 'Data:', styles: { halign: 'center', fontStyle: 'bold' } }
+      { content: city, styles: { halign: 'center', fontStyle: 'bold' as const } },
+      { content: 'Data:', styles: { halign: 'center', fontStyle: 'bold' as const } }
     ]],
     theme: 'grid',
     styles: { fontSize: 8, cellPadding: 1, lineWidth: 0.3 },
     columnStyles: {
-      0: { cellWidth: 60 },
-      1: { cellWidth: 60 },
-      2: { cellWidth: 60 }
+      0: { cellWidth: 120 },
+      1: { cellWidth: 60 }
     }
   });
   
