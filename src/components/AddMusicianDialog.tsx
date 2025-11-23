@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,18 +11,6 @@ interface AddMusicianDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const INSTRUMENTS = [
-  "FLAUTA",
-  "CLARINETE",
-  "SAXOFONE ALTO",
-  "SAXOFONE TENOR",
-  "TROMPETE",
-  "TROMBONE",
-  "BOMBARDINO",
-  "TROMPA",
-  "TUBA"
-];
 
 const CARGOS = [
   "MÚSICO",
@@ -47,6 +35,28 @@ export const AddMusicianDialog = ({ open, onOpenChange }: AddMusicianDialogProps
     nivel: "ENSAIO"
   });
   const [loading, setLoading] = useState(false);
+  const [instruments, setInstruments] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchInstruments = async () => {
+      const { data, error } = await supabase
+        .from('musicians')
+        .select('instrument')
+        .order('instrument');
+      
+      if (error) {
+        console.error('Error fetching instruments:', error);
+        return;
+      }
+      
+      const uniqueInstruments = [...new Set(data.map(m => m.instrument))];
+      setInstruments(uniqueInstruments);
+    };
+
+    if (open) {
+      fetchInstruments();
+    }
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +119,7 @@ export const AddMusicianDialog = ({ open, onOpenChange }: AddMusicianDialogProps
                 <SelectValue placeholder="Selecione o instrumento" />
               </SelectTrigger>
               <SelectContent>
-                {INSTRUMENTS.map((inst) => (
+                {instruments.map((inst) => (
                   <SelectItem key={inst} value={inst}>{inst}</SelectItem>
                 ))}
               </SelectContent>
