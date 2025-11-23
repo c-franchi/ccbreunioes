@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendances: {
+        Row: {
+          checked_in_at: string | null
+          id: string
+          meeting_session_id: string
+          musician_id: string
+          present: boolean
+        }
+        Insert: {
+          checked_in_at?: string | null
+          id?: string
+          meeting_session_id: string
+          musician_id: string
+          present?: boolean
+        }
+        Update: {
+          checked_in_at?: string | null
+          id?: string
+          meeting_session_id?: string
+          musician_id?: string
+          present?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendances_meeting_session_id_fkey"
+            columns: ["meeting_session_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendances_musician_id_fkey"
+            columns: ["musician_id"]
+            isOneToOne: false
+            referencedRelation: "musicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          meeting_date: string
+          meeting_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          meeting_date?: string
+          meeting_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          meeting_date?: string
+          meeting_name?: string | null
+        }
+        Relationships: []
+      }
+      musicians: {
+        Row: {
+          cargo_ministerio: string | null
+          created_at: string | null
+          id: string
+          instrument: string
+          localidade: string | null
+          name: string
+          nivel: string | null
+        }
+        Insert: {
+          cargo_ministerio?: string | null
+          created_at?: string | null
+          id?: string
+          instrument: string
+          localidade?: string | null
+          name: string
+          nivel?: string | null
+        }
+        Update: {
+          cargo_ministerio?: string | null
+          created_at?: string | null
+          id?: string
+          instrument?: string
+          localidade?: string | null
+          name?: string
+          nivel?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
