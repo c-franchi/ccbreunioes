@@ -8,7 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Plus, XCircle, FileText } from "lucide-react";
+import { Calendar, Plus, XCircle, FileText, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { generateEventPDF } from "@/utils/generateEventPDF";
 
@@ -19,6 +19,7 @@ interface EventManagerProps {
 
 export const EventManager = ({ currentSession, onSessionChange }: EventManagerProps) => {
   const [openSessions, setOpenSessions] = useState<any[]>([]);
+  const [closedSessions, setClosedSessions] = useState<any[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newEventName, setNewEventName] = useState("");
   const [newEventData, setNewEventData] = useState({
@@ -29,13 +30,19 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     ancioes_presentes: "",
     palavra: "",
     demais_irmaos: "",
-    observacao: ""
+    observacao: "",
+    hinos_cantados: 0,
+    hinos_ensaiados: 0,
+    quantidade_organistas: 0
   });
   const [loading, setLoading] = useState(false);
   const [sessionToClose, setSessionToClose] = useState<string | null>(null);
+  const [editingSession, setEditingSession] = useState<any | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   useEffect(() => {
     loadOpenSessions();
+    loadClosedSessions();
   }, []);
 
   const loadOpenSessions = async () => {
@@ -49,6 +56,21 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
       console.error(error);
     } else {
       setOpenSessions(data || []);
+    }
+  };
+
+  const loadClosedSessions = async () => {
+    const { data, error } = await supabase
+      .from('meeting_sessions')
+      .select('*, attendances(count)')
+      .eq('status', 'encerrado')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error(error);
+    } else {
+      setClosedSessions(data || []);
     }
   };
 
@@ -89,10 +111,14 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
         ancioes_presentes: "",
         palavra: "",
         demais_irmaos: "",
-        observacao: ""
+        observacao: "",
+        hinos_cantados: 0,
+        hinos_ensaiados: 0,
+        quantidade_organistas: 0
       });
       setShowCreateDialog(false);
       loadOpenSessions();
+      loadClosedSessions();
     }
     setLoading(false);
   };
@@ -113,6 +139,48 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     toast.success("Relatório PDF gerado com sucesso!");
   };
 
+  const handleEditSession = (session: any) => {
+    setEditingSession(session);
+    setShowEditDialog(true);
+  };
+
+  const saveEditedSession = async () => {
+    if (!editingSession) return;
+
+    setLoading(true);
+    const { error } = await supabase
+      .from('meeting_sessions')
+      .update({
+        anciao: editingSession.anciao,
+        regencia_enc_regional_1: editingSession.regencia_enc_regional_1,
+        regencia_enc_regional_2: editingSession.regencia_enc_regional_2,
+        examinadora: editingSession.examinadora,
+        ancioes_presentes: editingSession.ancioes_presentes,
+        palavra: editingSession.palavra,
+        demais_irmaos: editingSession.demais_irmaos,
+        observacao: editingSession.observacao,
+        hinos_cantados: editingSession.hinos_cantados,
+        hinos_ensaiados: editingSession.hinos_ensaiados,
+        quantidade_organistas: editingSession.quantidade_organistas
+      })
+      .eq('id', editingSession.id);
+
+    if (error) {
+      toast.error("Erro ao atualizar evento");
+      console.error(error);
+    } else {
+      toast.success("Evento atualizado com sucesso!");
+      setShowEditDialog(false);
+      setEditingSession(null);
+      loadOpenSessions();
+      loadClosedSessions();
+      if (currentSession?.id === editingSession.id) {
+        onSessionChange({ ...currentSession, ...editingSession });
+      }
+    }
+    setLoading(false);
+  };
+
   const closeEvent = async () => {
     if (!sessionToClose) return;
 
@@ -127,6 +195,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     } else {
       toast.success("Evento encerrado com sucesso!");
       loadOpenSessions();
+      loadClosedSessions();
       if (currentSession?.id === sessionToClose) {
         onSessionChange(null);
       }
@@ -247,6 +316,44 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                     rows={2}
                   />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hinos_cantados">Hinos Cantados</Label>
+                    <Input
+                      id="hinos_cantados"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={newEventData.hinos_cantados}
+                      onChange={(e) => setNewEventData({...newEventData, hinos_cantados: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="hinos_ensaiados">Hinos Ensaiados</Label>
+                    <Input
+                      id="hinos_ensaiados"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={newEventData.hinos_ensaiados}
+                      onChange={(e) => setNewEventData({...newEventData, hinos_ensaiados: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="quantidade_organistas">Quantidade de Organistas</Label>
+                    <Input
+                      id="quantidade_organistas"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={newEventData.quantidade_organistas}
+                      onChange={(e) => setNewEventData({...newEventData, quantidade_organistas: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                </div>
                 
                 <Button 
                   onClick={createNewEvent} 
@@ -261,68 +368,126 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
         </div>
       </CardHeader>
       <CardContent>
-        {openSessions.length === 0 ? (
+        {openSessions.length === 0 && closedSessions.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <p>Nenhum evento aberto</p>
+            <p>Nenhum evento encontrado</p>
             <p className="text-sm mt-2">Crie um novo evento para começar</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {openSessions.map((session) => {
-              const attendanceCount = session.attendances?.[0]?.count || 0;
-              const isActive = currentSession?.id === session.id;
-              
-              return (
-                <Card
-                  key={session.id}
-                  className={`transition-colors ${
-                    isActive
-                      ? 'bg-primary/10 border-primary'
-                      : 'hover:bg-accent/50'
-                  }`}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div 
-                        className="flex-1 cursor-pointer"
-                        onClick={() => onSessionChange(session)}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-semibold">{session.meeting_name}</p>
-                          {isActive && <Badge variant="default">Ativo</Badge>}
+          <div className="space-y-6">
+            {openSessions.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-muted-foreground">Eventos Ativos</h3>
+                {openSessions.map((session) => {
+                  const attendanceCount = session.attendances?.[0]?.count || 0;
+                  const isActive = currentSession?.id === session.id;
+                  
+                  return (
+                    <Card
+                      key={session.id}
+                      className={`transition-colors ${
+                        isActive
+                          ? 'bg-primary/10 border-primary'
+                          : 'hover:bg-accent/50'
+                      }`}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div 
+                            className="flex-1 cursor-pointer"
+                            onClick={() => onSessionChange(session)}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-semibold">{session.meeting_name}</p>
+                              {isActive && <Badge variant="default">Ativo</Badge>}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR')}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {attendanceCount} presença(s) confirmada(s)
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleGeneratePDF(session)}
+                              className="flex-shrink-0"
+                            >
+                              <FileText className="w-4 h-4 mr-2" />
+                              PDF
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditSession(session)}
+                              className="flex-shrink-0"
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Editar
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSessionToClose(session.id)}
+                              className="flex-shrink-0"
+                            >
+                              <XCircle className="w-4 h-4 mr-2" />
+                              Encerrar
+                            </Button>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR')}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {attendanceCount} presença(s) confirmada(s)
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleGeneratePDF(session)}
-                          className="flex-shrink-0"
-                        >
-                          <FileText className="w-4 h-4 mr-2" />
-                          PDF
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSessionToClose(session.id)}
-                          className="flex-shrink-0"
-                        >
-                          <XCircle className="w-4 h-4 mr-2" />
-                          Encerrar
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {closedSessions.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-muted-foreground">Eventos Encerrados</h3>
+                {closedSessions.map((session) => {
+                  const attendanceCount = session.attendances?.[0]?.count || 0;
+                  
+                  return (
+                    <Card
+                      key={session.id}
+                      className="opacity-75"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-semibold">{session.meeting_name}</p>
+                              <Badge variant="secondary">Encerrado</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR')}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {attendanceCount} presença(s) confirmada(s)
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleGeneratePDF(session)}
+                              className="flex-shrink-0"
+                            >
+                              <FileText className="w-4 h-4 mr-2" />
+                              PDF
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
@@ -343,6 +508,147 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Evento</DialogTitle>
+          </DialogHeader>
+          {editingSession && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_anciao">Ancião</Label>
+                  <Input
+                    id="edit_anciao"
+                    placeholder="Nome do ancião"
+                    value={editingSession.anciao || ""}
+                    onChange={(e) => setEditingSession({...editingSession, anciao: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit_regencia1">Regência Enc. Regional 1</Label>
+                  <Input
+                    id="edit_regencia1"
+                    placeholder="Nome"
+                    value={editingSession.regencia_enc_regional_1 || ""}
+                    onChange={(e) => setEditingSession({...editingSession, regencia_enc_regional_1: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit_regencia2">Regência Enc. Regional 2</Label>
+                  <Input
+                    id="edit_regencia2"
+                    placeholder="Nome"
+                    value={editingSession.regencia_enc_regional_2 || ""}
+                    onChange={(e) => setEditingSession({...editingSession, regencia_enc_regional_2: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit_examinadora">Examinadora</Label>
+                  <Input
+                    id="edit_examinadora"
+                    placeholder="Nome"
+                    value={editingSession.examinadora || ""}
+                    onChange={(e) => setEditingSession({...editingSession, examinadora: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit_ancioes">Anciães Presentes</Label>
+                <Input
+                  id="edit_ancioes"
+                  placeholder="Ex: Silvio Rogério, Samuel Borges"
+                  value={editingSession.ancioes_presentes || ""}
+                  onChange={(e) => setEditingSession({...editingSession, ancioes_presentes: e.target.value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit_palavra">Palavra</Label>
+                <Input
+                  id="edit_palavra"
+                  placeholder="Ex: Mateus capítulo 28 versos 16 ao 20"
+                  value={editingSession.palavra || ""}
+                  onChange={(e) => setEditingSession({...editingSession, palavra: e.target.value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit_demais">Demais Irmãos Presentes</Label>
+                <Textarea
+                  id="edit_demais"
+                  placeholder="Ex: Enc. Regionais: Braga, Cristiano..."
+                  value={editingSession.demais_irmaos || ""}
+                  onChange={(e) => setEditingSession({...editingSession, demais_irmaos: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit_observacao">Observação</Label>
+                <Textarea
+                  id="edit_observacao"
+                  placeholder="Observações gerais"
+                  value={editingSession.observacao || ""}
+                  onChange={(e) => setEditingSession({...editingSession, observacao: e.target.value})}
+                  rows={2}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_hinos_cantados">Hinos Cantados</Label>
+                  <Input
+                    id="edit_hinos_cantados"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={editingSession.hinos_cantados || 0}
+                    onChange={(e) => setEditingSession({...editingSession, hinos_cantados: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit_hinos_ensaiados">Hinos Ensaiados</Label>
+                  <Input
+                    id="edit_hinos_ensaiados"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={editingSession.hinos_ensaiados || 0}
+                    onChange={(e) => setEditingSession({...editingSession, hinos_ensaiados: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit_quantidade_organistas">Quantidade de Organistas</Label>
+                  <Input
+                    id="edit_quantidade_organistas"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={editingSession.quantidade_organistas || 0}
+                    onChange={(e) => setEditingSession({...editingSession, quantidade_organistas: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+              </div>
+              
+              <Button 
+                onClick={saveEditedSession} 
+                disabled={loading}
+                className="w-full"
+              >
+                Salvar Alterações
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

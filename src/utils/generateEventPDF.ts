@@ -12,6 +12,9 @@ interface EventData {
   palavra?: string;
   demais_irmaos?: string;
   observacao?: string;
+  hinos_cantados?: number;
+  hinos_ensaiados?: number;
+  quantidade_organistas?: number;
 }
 
 interface AttendanceData {
@@ -97,6 +100,29 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     doc.text(splitText, 20, yPos);
     yPos += 7 * splitText.length;
     doc.setFontSize(11);
+  }
+  
+  // Add hymns section
+  if (eventData.hinos_cantados || eventData.hinos_ensaiados) {
+    yPos += 5;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Hinos:', 20, yPos);
+    yPos += 7;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Cantados: ${eventData.hinos_cantados || 0}`, 20, yPos);
+    yPos += 7;
+    doc.text(`Ensaiados: ${eventData.hinos_ensaiados || 0}`, 20, yPos);
+    yPos += 7;
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total de Hinos: ${(eventData.hinos_cantados || 0) + (eventData.hinos_ensaiados || 0)}`, 20, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos += 7;
+  }
+
+  if (eventData.quantidade_organistas) {
+    doc.text(`Organistas: ${eventData.quantidade_organistas}`, 20, yPos);
+    yPos += 7;
   }
   
   yPos += 5;
