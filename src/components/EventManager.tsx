@@ -556,9 +556,10 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                       >
                         <option value="individual">Individual (um por vez)</option>
                         <option value="em_grupo">Em Grupo (múltiplos)</option>
+                        <option value="sem_nome">Sem Nome (apenas contagem)</option>
                       </select>
                       <p className="text-xs text-muted-foreground">
-                        Define como você prefere marcar presença dos músicos
+                        Define como você prefere marcar presença: individual com nome, em grupo, ou apenas contagem de instrumentos
                       </p>
                     </div>
                   </div>

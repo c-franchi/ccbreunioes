@@ -18,22 +18,25 @@ export type Database = {
         Row: {
           checked_in_at: string | null
           id: string
+          instrument: string | null
           meeting_session_id: string
-          musician_id: string
+          musician_id: string | null
           present: boolean
         }
         Insert: {
           checked_in_at?: string | null
           id?: string
+          instrument?: string | null
           meeting_session_id: string
-          musician_id: string
+          musician_id?: string | null
           present?: boolean
         }
         Update: {
           checked_in_at?: string | null
           id?: string
+          instrument?: string | null
           meeting_session_id?: string
-          musician_id?: string
+          musician_id?: string | null
           present?: boolean
         }
         Relationships: [
