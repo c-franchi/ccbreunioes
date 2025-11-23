@@ -3,12 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, Plus, CheckCircle2, XCircle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar, Plus, XCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { generateEventPDF } from "@/utils/generateEventPDF";
 
 interface EventManagerProps {
   currentSession: any;
@@ -19,6 +21,16 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
   const [openSessions, setOpenSessions] = useState<any[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newEventName, setNewEventName] = useState("");
+  const [newEventData, setNewEventData] = useState({
+    anciao: "",
+    regencia_enc_regional_1: "",
+    regencia_enc_regional_2: "",
+    examinadora: "",
+    ancioes_presentes: "",
+    palavra: "",
+    demais_irmaos: "",
+    observacao: ""
+  });
   const [loading, setLoading] = useState(false);
   const [sessionToClose, setSessionToClose] = useState<string | null>(null);
 
@@ -56,7 +68,8 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
       .insert({
         meeting_date: today,
         meeting_name: eventName,
-        status: 'aberto'
+        status: 'aberto',
+        ...newEventData
       })
       .select()
       .single();
@@ -68,10 +81,36 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
       toast.success("Evento criado com sucesso!");
       onSessionChange(data);
       setNewEventName("");
+      setNewEventData({
+        anciao: "",
+        regencia_enc_regional_1: "",
+        regencia_enc_regional_2: "",
+        examinadora: "",
+        ancioes_presentes: "",
+        palavra: "",
+        demais_irmaos: "",
+        observacao: ""
+      });
       setShowCreateDialog(false);
       loadOpenSessions();
     }
     setLoading(false);
+  };
+
+  const handleGeneratePDF = async (session: any) => {
+    const { data: attendances, error } = await supabase
+      .from('attendances')
+      .select('*, musician:musicians(*)')
+      .eq('meeting_session_id', session.id);
+
+    if (error) {
+      toast.error("Erro ao carregar dados para o relatório");
+      console.error(error);
+      return;
+    }
+
+    generateEventPDF(session, attendances || []);
+    toast.success("Relatório PDF gerado com sucesso!");
   };
 
   const closeEvent = async () => {
@@ -110,21 +149,105 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                 Novo Evento
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Criar Novo Evento</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="eventName">Nome do Evento</Label>
+                  <Label htmlFor="eventName">Nome do Evento *</Label>
                   <Input
                     id="eventName"
-                    placeholder="Ex: REUNIÃO DE MADEIRA 23/11/2025 14:00"
+                    placeholder="Ex: ENSAIO REGIONAL - RINCÃO - SP"
                     value={newEventName}
                     onChange={(e) => setNewEventName(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && createNewEvent()}
                   />
                 </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="anciao">Ancião</Label>
+                    <Input
+                      id="anciao"
+                      placeholder="Nome do ancião"
+                      value={newEventData.anciao}
+                      onChange={(e) => setNewEventData({...newEventData, anciao: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="regencia1">Regência Enc. Regional 1</Label>
+                    <Input
+                      id="regencia1"
+                      placeholder="Nome"
+                      value={newEventData.regencia_enc_regional_1}
+                      onChange={(e) => setNewEventData({...newEventData, regencia_enc_regional_1: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="regencia2">Regência Enc. Regional 2</Label>
+                    <Input
+                      id="regencia2"
+                      placeholder="Nome"
+                      value={newEventData.regencia_enc_regional_2}
+                      onChange={(e) => setNewEventData({...newEventData, regencia_enc_regional_2: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="examinadora">Examinadora</Label>
+                    <Input
+                      id="examinadora"
+                      placeholder="Nome"
+                      value={newEventData.examinadora}
+                      onChange={(e) => setNewEventData({...newEventData, examinadora: e.target.value})}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ancioes">Anciães Presentes</Label>
+                  <Input
+                    id="ancioes"
+                    placeholder="Ex: Silvio Rogério, Samuel Borges"
+                    value={newEventData.ancioes_presentes}
+                    onChange={(e) => setNewEventData({...newEventData, ancioes_presentes: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="palavra">Palavra</Label>
+                  <Input
+                    id="palavra"
+                    placeholder="Ex: Mateus capítulo 28 versos 16 ao 20"
+                    value={newEventData.palavra}
+                    onChange={(e) => setNewEventData({...newEventData, palavra: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="demais">Demais Irmãos Presentes</Label>
+                  <Textarea
+                    id="demais"
+                    placeholder="Ex: Enc. Regionais: Braga, Cristiano..."
+                    value={newEventData.demais_irmaos}
+                    onChange={(e) => setNewEventData({...newEventData, demais_irmaos: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="observacao">Observação</Label>
+                  <Textarea
+                    id="observacao"
+                    placeholder="Observações gerais"
+                    value={newEventData.observacao}
+                    onChange={(e) => setNewEventData({...newEventData, observacao: e.target.value})}
+                    rows={2}
+                  />
+                </div>
+                
                 <Button 
                   onClick={createNewEvent} 
                   disabled={loading}
@@ -175,15 +298,26 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                           {attendanceCount} presença(s) confirmada(s)
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSessionToClose(session.id)}
-                        className="flex-shrink-0"
-                      >
-                        <XCircle className="w-4 h-4 mr-2" />
-                        Encerrar
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleGeneratePDF(session)}
+                          className="flex-shrink-0"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          PDF
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSessionToClose(session.id)}
+                          className="flex-shrink-0"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Encerrar
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
