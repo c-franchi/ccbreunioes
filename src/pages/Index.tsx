@@ -14,7 +14,8 @@ const Index = () => {
   // Create or get today's session
   useEffect(() => {
     const initSession = async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
       
       // Check if session exists for today
       const { data: existing, error: fetchError } = await supabase
@@ -26,12 +27,14 @@ const Index = () => {
       if (existing) {
         setCurrentSession(existing);
       } else {
-        // Create new session
+        // Create new session with date and time
+        const dateStr = now.toLocaleDateString('pt-BR');
+        const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         const { data: newSession, error: createError } = await supabase
           .from('meeting_sessions')
           .insert({
             meeting_date: today,
-            meeting_name: `Reunião ${new Date().toLocaleDateString('pt-BR')}`
+            meeting_name: `REUNIÃO DE MADEIRA ${dateStr} ${timeStr}`
           })
           .select()
           .single();

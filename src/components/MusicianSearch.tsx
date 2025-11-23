@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -110,12 +110,11 @@ export const MusicianSearch = ({ currentSessionId }: MusicianSearchProps) => {
               {musicians.map((musician) => (
                 <Card 
                   key={musician.id}
-                  className="cursor-pointer hover:bg-accent transition-colors"
-                  onClick={() => handleCheckIn(musician)}
+                  className="hover:bg-accent/50 transition-colors"
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1 flex-1">
                         <h3 className="font-semibold">{musician.name}</h3>
                         <div className="flex gap-2 flex-wrap">
                           <Badge variant="secondary">{musician.instrument}</Badge>
@@ -126,6 +125,14 @@ export const MusicianSearch = ({ currentSessionId }: MusicianSearchProps) => {
                         <p className="text-sm text-muted-foreground">{musician.localidade}</p>
                         <p className="text-xs text-muted-foreground">{musician.nivel}</p>
                       </div>
+                      <Button
+                        onClick={() => handleCheckIn(musician)}
+                        size="sm"
+                        className="flex-shrink-0"
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        Confirmar
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
