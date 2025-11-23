@@ -6,12 +6,13 @@ interface EventData {
 }
 
 interface AttendanceData {
-  musician: {
+  instrument?: string | null;
+  musician?: {
     name: string;
     instrument: string;
     cargo_ministerio?: string;
     localidade?: string;
-  };
+  } | null;
 }
 
 const INSTRUMENT_GROUPS: Record<string, string[]> = {
@@ -61,7 +62,8 @@ export const generateEventCSV = (eventData: EventData, attendances: AttendanceDa
     // Group by naipe
     const grouped: Record<string, AttendanceData[]> = {};
     attendances.forEach(att => {
-      const group = findInstrumentGroup(att.musician.instrument);
+      const instrumentName = att.musician?.instrument || att.instrument || 'Desconhecido';
+      const group = findInstrumentGroup(instrumentName);
       if (!grouped[group]) grouped[group] = [];
       grouped[group].push(att);
     });
@@ -73,10 +75,10 @@ export const generateEventCSV = (eventData: EventData, attendances: AttendanceDa
       members.forEach(att => {
         rows.push([
           naipe,
-          att.musician.name,
-          att.musician.instrument,
-          att.musician.cargo_ministerio || '',
-          att.musician.localidade || ''
+          att.musician?.name || 'Contagem sem nome',
+          att.musician?.instrument || att.instrument || '',
+          att.musician?.cargo_ministerio || '',
+          att.musician?.localidade || ''
         ]);
       });
     });
@@ -90,10 +92,10 @@ export const generateEventCSV = (eventData: EventData, attendances: AttendanceDa
     const headers = ['Nome', 'Instrumento', 'Cargo/Ministério', 'Localidade'];
     
     const rows = attendances.map(att => [
-      att.musician.name,
-      att.musician.instrument,
-      att.musician.cargo_ministerio || '',
-      att.musician.localidade || ''
+      att.musician?.name || 'Contagem sem nome',
+      att.musician?.instrument || att.instrument || '',
+      att.musician?.cargo_ministerio || '',
+      att.musician?.localidade || ''
     ]);
     
     csvContent = [
