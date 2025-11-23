@@ -53,7 +53,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
   doc.setFontSize(10);
   doc.text('ENSAIO REGIONAL', pageWidth / 2, 16, { align: 'center' });
   
-  // Top section table with meeting type, city and date
+  // Top section table with meeting type, city and date (only meeting info, not date)
   const meetingType = eventData.meeting_name || '';
   const city = eventData.cidade || '';
   const displayLocation = `${meetingType}${meetingType && city ? ' - ' : ''}${city}`;
@@ -63,7 +63,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     head: [],
     body: [[
       { content: displayLocation, styles: { halign: 'center', fontStyle: 'bold' as const } },
-      { content: 'Data:', styles: { halign: 'center', fontStyle: 'bold' as const } }
+      { content: `Data:\n${new Date(eventData.meeting_date).toLocaleDateString('pt-BR')}`, styles: { halign: 'center', fontStyle: 'bold' as const } }
     ]],
     theme: 'grid',
     styles: { fontSize: 8, cellPadding: 1, lineWidth: 0.3 },
@@ -85,7 +85,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
       { content: 'Atendimento:', rowSpan: 4, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
       { content: 'Ancião:' },
       { content: eventData.anciao || '', colSpan: 2 },
-      { content: new Date(eventData.meeting_date).toLocaleDateString('pt-BR'), rowSpan: 4, styles: { valign: 'middle' as const, halign: 'center' as const } }
+      { content: '', rowSpan: 4, styles: { valign: 'middle' as const, halign: 'center' as const, fillColor: [255, 255, 255], lineWidth: 0 } }
     ]);
     
     // Row 2: Regência Enc. Regional 1
@@ -172,7 +172,14 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     const ministry = att.musician.cargo_ministerio || 'Não especificado';
     
     for (const [group, instruments] of Object.entries(INSTRUMENT_GROUPS)) {
-      if (instruments.some(i => instrument.includes(i) || i.includes(instrument))) {
+      // More precise matching - check if the instrument matches exactly or starts with the instrument name
+      const matchedInstrument = instruments.find(i => 
+        instrument === i || 
+        instrument.startsWith(i) || 
+        i.startsWith(instrument)
+      );
+      
+      if (matchedInstrument) {
         if (!instrumentCounts[group]) {
           instrumentCounts[group] = {};
         }
@@ -199,26 +206,30 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     const groupCount = groupTotals[group] || 0;
     const groupPercentage = grandTotal > 0 ? Math.round((groupCount / grandTotal) * 100) : 0;
     
-    let firstInstrument = true;
-    instruments.forEach((instrument) => {
+    // Get actual instruments that have attendance
+    const actualInstruments = instruments.map(instrument => {
       const count = instrumentCounts[group]?.[instrument] || 0;
-      
+      return { name: instrument, count };
+    });
+    
+    let firstInstrument = true;
+    actualInstruments.forEach(({ name: instrument, count }) => {
       if (firstInstrument) {
         instrumentRows.push([
-          { content: group, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
-          instrument,
-          { content: count, styles: { halign: 'center' as const } },
-          { content: groupCount, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
-          { content: `${groupPercentage}%`, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } }
+          { content: group, rowSpan: actualInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
+          { content: instrument, styles: { halign: 'left' as const } },
+          { content: count, styles: { halign: 'center' as const, fontStyle: 'bold' as const } },
+          { content: groupCount, rowSpan: actualInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
+          { content: `${groupPercentage}%`, rowSpan: actualInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } }
         ]);
         firstInstrument = false;
       } else {
         instrumentRows.push([
-          '',
-          instrument,
-          { content: count, styles: { halign: 'center' as const } },
-          '',
-          ''
+          { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
+          { content: instrument, styles: { halign: 'left' as const } },
+          { content: count, styles: { halign: 'center' as const, fontStyle: 'bold' as const } },
+          { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
+          { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } }
         ]);
       }
     });
@@ -315,6 +326,18 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
   const hinosCantados = eventData.hinos_cantados || '';
   const hinosEnsaiados = eventData.hinos_ensaiados || '';
   
+  // Count hymns for proper singular/plural
+  const countHinos = (hinosStr: string) => {
+    if (!hinosStr) return 0;
+    return hinosStr.split(',').map(h => h.trim()).filter(h => h).length;
+  };
+  
+  const cantadosCount = countHinos(hinosCantados);
+  const ensaiadosCount = countHinos(hinosEnsaiados);
+  
+  const cantadosLabel = cantadosCount === 1 ? 'Cantado' : 'Cantados';
+  const ensaiadosLabel = ensaiadosCount === 1 ? 'Ensaiado' : 'Ensaiados';
+  
   bottomRows.push([
     { content: 'Total Geral de Instrumentos', styles: { fontStyle: 'bold' as const } },
     { content: grandTotal, styles: { fontStyle: 'bold' as const, halign: 'center' as const } },
@@ -327,7 +350,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     { content: 'Total de Organistas', styles: { fontStyle: 'bold' as const } },
     { content: eventData.quantidade_organistas || 0, styles: { fontStyle: 'bold' as const, halign: 'center' as const } },
     { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
-    { content: `Cantado: ${hinosCantados}` }
+    { content: `${cantadosLabel}: ${hinosCantados}` }
   ]);
   
   // Row 3: Total Geral do Ensaio / Ensaiados
@@ -335,7 +358,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     { content: 'Total Geral do Ensaio', styles: { fontStyle: 'bold' as const } },
     { content: grandTotal + (eventData.quantidade_organistas || 0), styles: { fontStyle: 'bold' as const, halign: 'center' as const } },
     { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
-    { content: `Ensaiados: ${hinosEnsaiados}` }
+    { content: `${ensaiadosLabel}: ${hinosEnsaiados}` }
   ]);
   
   // Calculate total hymns
