@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { MusicianSearch } from "@/components/MusicianSearch";
 import { AttendanceStats } from "@/components/AttendanceStats";
 import { AttendanceList } from "@/components/AttendanceList";
+import { SessionSelector } from "@/components/SessionSelector";
 
 const Index = () => {
   const [currentSession, setCurrentSession] = useState<any>(null);
@@ -131,7 +132,15 @@ const Index = () => {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Search Section */}
           <div className="lg:col-span-2 space-y-6">
-            <MusicianSearch currentSessionId={currentSession?.id} />
+            <SessionSelector 
+              currentSession={currentSession}
+              onSessionSelect={setCurrentSession}
+            />
+            
+            <MusicianSearch 
+              currentSessionId={currentSession?.id}
+              attendances={attendances}
+            />
             
             {/* Attendance List */}
             <AttendanceList 

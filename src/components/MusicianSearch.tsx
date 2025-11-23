@@ -10,9 +10,10 @@ import { AddMusicianDialog } from "./AddMusicianDialog";
 
 interface MusicianSearchProps {
   currentSessionId: string | undefined;
+  attendances: any[];
 }
 
-export const MusicianSearch = ({ currentSessionId }: MusicianSearchProps) => {
+export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearchProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [musicians, setMusicians] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,21 +45,17 @@ export const MusicianSearch = ({ currentSessionId }: MusicianSearchProps) => {
     return () => clearTimeout(debounce);
   }, [searchTerm]);
 
+  const isAlreadyPresent = (musicianId: string) => {
+    return attendances.some(att => att.musician_id === musicianId);
+  };
+
   const handleCheckIn = async (musician: any) => {
     if (!currentSessionId) {
       toast.error("Sessão não iniciada");
       return;
     }
 
-    // Check if already checked in
-    const { data: existing } = await supabase
-      .from('attendances')
-      .select('*')
-      .eq('musician_id', musician.id)
-      .eq('meeting_session_id', currentSessionId)
-      .single();
-
-    if (existing) {
+    if (isAlreadyPresent(musician.id)) {
       toast.info(`${musician.name} já teve presença confirmada!`);
       return;
     }
@@ -129,9 +126,11 @@ export const MusicianSearch = ({ currentSessionId }: MusicianSearchProps) => {
                         onClick={() => handleCheckIn(musician)}
                         size="sm"
                         className="flex-shrink-0"
+                        variant={isAlreadyPresent(musician.id) ? "secondary" : "default"}
+                        disabled={isAlreadyPresent(musician.id)}
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        Confirmar
+                        {isAlreadyPresent(musician.id) ? "Já Presente" : "Confirmar"}
                       </Button>
                     </div>
                   </CardContent>
