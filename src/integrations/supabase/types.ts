@@ -80,6 +80,8 @@ export type Database = {
           regencia_enc_regional_1: string | null
           regencia_enc_regional_2: string | null
           status: string | null
+          tipo_contagem: string | null
+          tipo_presenca: string | null
         }
         Insert: {
           anciao?: string | null
@@ -107,6 +109,8 @@ export type Database = {
           regencia_enc_regional_1?: string | null
           regencia_enc_regional_2?: string | null
           status?: string | null
+          tipo_contagem?: string | null
+          tipo_presenca?: string | null
         }
         Update: {
           anciao?: string | null
@@ -134,6 +138,8 @@ export type Database = {
           regencia_enc_regional_1?: string | null
           regencia_enc_regional_2?: string | null
           status?: string | null
+          tipo_contagem?: string | null
+          tipo_presenca?: string | null
         }
         Relationships: []
       }
