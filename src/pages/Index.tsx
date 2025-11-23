@@ -5,6 +5,7 @@ import { MusicianSearch } from "@/components/MusicianSearch";
 import { AttendanceStats } from "@/components/AttendanceStats";
 import { AttendanceList } from "@/components/AttendanceList";
 import { EventManager } from "@/components/EventManager";
+import { GroupAttendanceMarker } from "@/components/GroupAttendanceMarker";
 const Index = () => {
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [attendances, setAttendances] = useState<any[]>([]);
@@ -85,7 +86,17 @@ const Index = () => {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <EventManager currentSession={currentSession} onSessionChange={setCurrentSession} />
             
-            {currentSession && <MusicianSearch currentSessionId={currentSession?.id} attendances={attendances} />}
+            {currentSession && currentSession.tipo_presenca === 'individual' && (
+              <MusicianSearch currentSessionId={currentSession?.id} attendances={attendances} />
+            )}
+            
+            {currentSession && currentSession.tipo_presenca === 'em_grupo' && (
+              <GroupAttendanceMarker 
+                currentSessionId={currentSession.id} 
+                attendances={attendances}
+                tipoContagem={currentSession.tipo_contagem || 'instrumento'}
+              />
+            )}
             
             {/* Attendance List */}
             {currentSession && <AttendanceList attendances={attendances} sessionId={currentSession?.id} />}
