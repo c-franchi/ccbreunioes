@@ -29,11 +29,12 @@ interface EventData {
 }
 
 interface AttendanceData {
-  musician: {
+  instrument?: string | null;
+  musician?: {
     name: string;
     instrument: string;
     cargo_ministerio?: string;
-  };
+  } | null;
 }
 
 // Grupos de instrumentos iguais ao modelo
@@ -82,7 +83,8 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
       .trim();
 
   attendances.forEach((att) => {
-    const rawInstrument = att.musician.instrument || '';
+    // Handle both musician-based and direct instrument counting
+    const rawInstrument = att.musician?.instrument || att.instrument || '';
     const normInstrument = normalize(rawInstrument);
 
     for (const [group, instruments] of Object.entries(INSTRUMENT_GROUPS)) {

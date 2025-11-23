@@ -9,10 +9,15 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Plus, XCircle, FileText, Edit, Trash2, Download } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar, Plus, XCircle, FileText, Edit, Trash2, Download, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { generateEventPDF } from "@/utils/generateEventPDF";
 import { generateEventCSV } from "@/utils/generateEventCSV";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface EventManagerProps {
   currentSession: any;
@@ -24,6 +29,11 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
   const [closedSessions, setClosedSessions] = useState<any[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newEventName, setNewEventName] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedTime, setSelectedTime] = useState<string>(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  });
   const [newEventData, setNewEventData] = useState({
     anciao: "",
     regencia_enc_regional_1: "",
@@ -95,14 +105,18 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     }
 
     setLoading(true);
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
     const eventName = newEventName.trim();
+    
+    // Combine date and time into ISO format
+    const [hours, minutes] = selectedTime.split(':');
+    const eventDateTime = new Date(selectedDate);
+    eventDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    const meetingDate = eventDateTime.toISOString().split('T')[0];
 
     const { data, error } = await supabase
       .from('meeting_sessions')
       .insert({
-        meeting_date: today,
+        meeting_date: meetingDate,
         meeting_name: eventName,
         status: 'aberto',
         ...newEventData
@@ -117,6 +131,9 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
       toast.success("Evento criado com sucesso!");
       onSessionChange(data);
       setNewEventName("");
+      setSelectedDate(new Date());
+      const now = new Date();
+      setSelectedTime(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
       setNewEventData({
         anciao: "",
         regencia_enc_regional_1: "",
@@ -290,14 +307,13 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="eventName">Tipo de Reunião *</Label>
+                    <Label htmlFor="eventName">Título da Reunião *</Label>
                     <Input
                       id="eventName"
                       placeholder="Ex: Reunião Madeira, Ensaio Cordas"
                       value={newEventName}
                       onChange={(e) => setNewEventName(e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">Apenas o nome da reunião, sem data</p>
                   </div>
                   
                   <div className="space-y-2">
@@ -308,6 +324,49 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                       value={newEventData.cidade}
                       onChange={(e) => setNewEventData({...newEventData, cidade: e.target.value})}
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Data da Reunião *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !selectedDate && "text-muted-foreground"
+                          )}
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {selectedDate ? format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : <span>Selecione a data</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={(date) => date && setSelectedDate(date)}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="eventTime">Horário da Reunião *</Label>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="eventTime"
+                        type="time"
+                        value={selectedTime}
+                        onChange={(e) => setSelectedTime(e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
                   </div>
                 </div>
                 

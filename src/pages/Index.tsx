@@ -57,7 +57,8 @@ const Index = () => {
   const calculateStats = (data: any[]) => {
     const instrumentCounts: any = {};
     data.forEach(attendance => {
-      const instrument = attendance.musicians?.instrument || 'Desconhecido';
+      // Handle both musician-based and direct instrument counting
+      const instrument = attendance.musicians?.instrument || attendance.instrument || 'Desconhecido';
       instrumentCounts[instrument] = (instrumentCounts[instrument] || 0) + 1;
     });
     setStats({
