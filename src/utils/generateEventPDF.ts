@@ -53,22 +53,25 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
   doc.setFontSize(10);
   doc.text('ENSAIO REGIONAL', pageWidth / 2, 16, { align: 'center' });
   
-  // Top section table with city and date
+  // Top section table with meeting type, city and date
+  const meetingType = eventData.meeting_name || '';
   const city = eventData.cidade || '';
+  const displayLocation = `${meetingType}${meetingType && city ? ' - ' : ''}${city}`;
   
   autoTable(doc, {
     startY: 20,
     head: [],
     body: [[
-      { content: city, styles: { halign: 'center', fontStyle: 'bold' as const } },
+      { content: displayLocation, styles: { halign: 'center', fontStyle: 'bold' as const } },
       { content: 'Data:', styles: { halign: 'center', fontStyle: 'bold' as const } }
     ]],
     theme: 'grid',
     styles: { fontSize: 8, cellPadding: 1, lineWidth: 0.3 },
     columnStyles: {
-      0: { cellWidth: 120 },
-      1: { cellWidth: 60 }
-    }
+      0: { cellWidth: 150 },
+      1: { cellWidth: 30 }
+    },
+    tableWidth: 180
   });
   
   // Attendance section
@@ -124,10 +127,11 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     columnStyles: {
       0: { cellWidth: 30 },
       1: { cellWidth: 45 },
-      2: { cellWidth: 60 },
-      3: { cellWidth: 15 },
+      2: { cellWidth: 70 },
+      3: { cellWidth: 5 },
       4: { cellWidth: 30 }
-    }
+    },
+    tableWidth: 180
   });
   
   currentY = (doc as any).lastAutoTable.finalY;
@@ -150,9 +154,10 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
       styles: { fontSize: 7, cellPadding: 1, lineWidth: 0.3 },
       columnStyles: {
         0: { cellWidth: 40 },
-        1: { cellWidth: 80 },
-        2: { cellWidth: 60 }
-      }
+        1: { cellWidth: 85 },
+        2: { cellWidth: 55 }
+      },
+      tableWidth: 180
     });
     
     currentY = (doc as any).lastAutoTable.finalY;
@@ -290,14 +295,15 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold' as const, lineWidth: 0.3, halign: 'center' as const, fontSize: 6 },
     styles: { fontSize: 6, cellPadding: 0.5, lineWidth: 0.3 },
     columnStyles: {
-      0: { cellWidth: 18, halign: 'center' as const },
-      1: { cellWidth: 32 },
-      2: { cellWidth: 12, halign: 'center' as const },
-      3: { cellWidth: 12, halign: 'center' as const },
-      4: { cellWidth: 8, halign: 'center' as const },
-      5: { cellWidth: 40 },
-      6: { cellWidth: 12, halign: 'center' as const }
-    }
+      0: { cellWidth: 20, halign: 'center' as const },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 15, halign: 'center' as const },
+      3: { cellWidth: 15, halign: 'center' as const },
+      4: { cellWidth: 10, halign: 'center' as const },
+      5: { cellWidth: 50 },
+      6: { cellWidth: 15, halign: 'center' as const }
+    },
+    tableWidth: 180
   });
   
   currentY = (doc as any).lastAutoTable.finalY + 2;
@@ -357,9 +363,10 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     columnStyles: {
       0: { cellWidth: 50 },
       1: { cellWidth: 20, halign: 'center' as const },
-      2: { cellWidth: 40 },
-      3: { cellWidth: 70 }
-    }
+      2: { cellWidth: 20 },
+      3: { cellWidth: 90 }
+    },
+    tableWidth: 180
   });
   
   // Save PDF
