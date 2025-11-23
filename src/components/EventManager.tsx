@@ -44,7 +44,9 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     ministerio_enc_regionais: 0,
     ministerio_enc_locais: 0,
     ministerio_examinadoras: 0,
-    ministerio_administracao: 0
+    ministerio_administracao: 0,
+    tipo_contagem: "instrumento",
+    tipo_presenca: "individual"
   });
   const [loading, setLoading] = useState(false);
   const [sessionToClose, setSessionToClose] = useState<string | null>(null);
@@ -135,7 +137,9 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
         ministerio_enc_regionais: 0,
         ministerio_enc_locais: 0,
         ministerio_examinadoras: 0,
-        ministerio_administracao: 0
+        ministerio_administracao: 0,
+        tipo_contagem: "instrumento",
+        tipo_presenca: "individual"
       });
       setShowCreateDialog(false);
       loadOpenSessions();
@@ -519,6 +523,43 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                         value={newEventData.ministerio_administracao}
                         onChange={(e) => setNewEventData({...newEventData, ministerio_administracao: parseInt(e.target.value) || 0})}
                       />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Configurações do Relatório</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="tipo_contagem">Tipo de Contagem no PDF</Label>
+                      <select
+                        id="tipo_contagem"
+                        value={newEventData.tipo_contagem}
+                        onChange={(e) => setNewEventData({...newEventData, tipo_contagem: e.target.value})}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <option value="instrumento">Por Instrumento (individual)</option>
+                        <option value="naipe">Por Naipe (agrupado)</option>
+                      </select>
+                      <p className="text-xs text-muted-foreground">
+                        Instrumento: mostra cada instrumento separado. Naipe: agrupa por Cordas, Madeiras, Metais
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="tipo_presenca">Método de Marcação</Label>
+                      <select
+                        id="tipo_presenca"
+                        value={newEventData.tipo_presenca}
+                        onChange={(e) => setNewEventData({...newEventData, tipo_presenca: e.target.value})}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <option value="individual">Individual (um por vez)</option>
+                        <option value="em_grupo">Em Grupo (múltiplos)</option>
+                      </select>
+                      <p className="text-xs text-muted-foreground">
+                        Define como você prefere marcar presença dos músicos
+                      </p>
                     </div>
                   </div>
                 </div>

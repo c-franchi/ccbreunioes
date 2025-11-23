@@ -15,6 +15,7 @@ interface EventData {
   hinos_ensaiados?: string;
   quantidade_organistas?: number;
   cidade?: string;
+  tipo_contagem?: string;
   
   // Campos de ministério presente
   ministerio_anciaes?: number;
@@ -66,6 +67,8 @@ const INSTRUMENT_GROUPS = {
 };
 
 export const generateEventPDF = (eventData: EventData, attendances: AttendanceData[]) => {
+  const tipoContagem = eventData.tipo_contagem || 'instrumento';
+  
   // Count instruments
   const instrumentCounts: Record<string, Record<string, number>> = {};
   
@@ -317,7 +320,10 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
             </tr>
           </thead>
           <tbody>
-            ${generateInstrumentRows(INSTRUMENT_GROUPS, instrumentCounts, groupTotals, grandTotal)}
+            ${tipoContagem === 'naipe' 
+              ? generateNaipeRows(instrumentCounts, groupTotals, grandTotal)
+              : generateInstrumentRows(INSTRUMENT_GROUPS, instrumentCounts, groupTotals, grandTotal)
+            }
             <tr class="total-row">
               <td colspan="2" style="text-align:center;">Total Geral de Instrumentos</td>
               <td class="number-cell">${grandTotal}</td>
@@ -425,6 +431,27 @@ function generateInstrumentRows(
 
       html += '</tr>';
     });
+  });
+
+  return html;
+}
+
+function generateNaipeRows(
+  instrumentCounts: Record<string, Record<string, number>>,
+  groupTotals: Record<string, number>,
+  grandTotal: number
+): string {
+  let html = '';
+
+  Object.entries(groupTotals).forEach(([group, total]) => {
+    const percentage = grandTotal > 0 ? Math.round((total / grandTotal) * 100) : 0;
+    
+    html += '<tr>';
+    html += `<td class="naipe-cell" colspan="2">${group}</td>`;
+    html += `<td class="number-cell">${total}</td>`;
+    html += `<td class="number-cell">${total}</td>`;
+    html += `<td class="number-cell">${percentage}%</td>`;
+    html += '</tr>';
   });
 
   return html;
