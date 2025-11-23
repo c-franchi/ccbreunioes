@@ -60,8 +60,8 @@ export type Database = {
           created_at: string | null
           demais_irmaos: string | null
           examinadora: string | null
-          hinos_cantados: number | null
-          hinos_ensaiados: number | null
+          hinos_cantados: string | null
+          hinos_ensaiados: string | null
           id: string
           meeting_date: string
           meeting_name: string | null
@@ -78,8 +78,8 @@ export type Database = {
           created_at?: string | null
           demais_irmaos?: string | null
           examinadora?: string | null
-          hinos_cantados?: number | null
-          hinos_ensaiados?: number | null
+          hinos_cantados?: string | null
+          hinos_ensaiados?: string | null
           id?: string
           meeting_date?: string
           meeting_name?: string | null
@@ -96,8 +96,8 @@ export type Database = {
           created_at?: string | null
           demais_irmaos?: string | null
           examinadora?: string | null
-          hinos_cantados?: number | null
-          hinos_ensaiados?: number | null
+          hinos_cantados?: string | null
+          hinos_ensaiados?: string | null
           id?: string
           meeting_date?: string
           meeting_name?: string | null
