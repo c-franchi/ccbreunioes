@@ -59,18 +59,21 @@ export type Database = {
           id: string
           meeting_date: string
           meeting_name: string | null
+          status: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           meeting_date?: string
           meeting_name?: string | null
+          status?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           meeting_date?: string
           meeting_name?: string | null
+          status?: string | null
         }
         Relationships: []
       }

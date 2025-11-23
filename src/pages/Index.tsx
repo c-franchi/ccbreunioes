@@ -1,56 +1,17 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Users, Music, CheckCircle2, XCircle } from "lucide-react";
-import { toast } from "sonner";
+import { Music } from "lucide-react";
 import { MusicianSearch } from "@/components/MusicianSearch";
 import { AttendanceStats } from "@/components/AttendanceStats";
 import { AttendanceList } from "@/components/AttendanceList";
-import { SessionSelector } from "@/components/SessionSelector";
+import { EventManager } from "@/components/EventManager";
 
 const Index = () => {
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [attendances, setAttendances] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
 
-  // Create or get today's session
-  useEffect(() => {
-    const initSession = async () => {
-      const now = new Date();
-      const today = now.toISOString().split('T')[0];
-      
-      // Check if session exists for today
-      const { data: existing, error: fetchError } = await supabase
-        .from('meeting_sessions')
-        .select('*')
-        .eq('meeting_date', today)
-        .single();
-
-      if (existing) {
-        setCurrentSession(existing);
-      } else {
-        // Create new session with date and time
-        const dateStr = now.toLocaleDateString('pt-BR');
-        const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        const { data: newSession, error: createError } = await supabase
-          .from('meeting_sessions')
-          .insert({
-            meeting_date: today,
-            meeting_name: `REUNIÃO DE MADEIRA ${dateStr} ${timeStr}`
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          toast.error("Erro ao criar sessão");
-          console.error(createError);
-        } else {
-          setCurrentSession(newSession);
-        }
-      }
-    };
-
-    initSession();
-  }, []);
+  // No automatic session creation - user must select or create
 
   // Load attendances for current session
   useEffect(() => {
@@ -130,23 +91,27 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Search Section */}
+          {/* Event Management and Search */}
           <div className="lg:col-span-2 space-y-6">
-            <SessionSelector 
+            <EventManager 
               currentSession={currentSession}
-              onSessionSelect={setCurrentSession}
+              onSessionChange={setCurrentSession}
             />
             
-            <MusicianSearch 
-              currentSessionId={currentSession?.id}
-              attendances={attendances}
-            />
+            {currentSession && (
+              <MusicianSearch 
+                currentSessionId={currentSession?.id}
+                attendances={attendances}
+              />
+            )}
             
             {/* Attendance List */}
-            <AttendanceList 
-              attendances={attendances}
-              sessionId={currentSession?.id}
-            />
+            {currentSession && (
+              <AttendanceList 
+                attendances={attendances}
+                sessionId={currentSession?.id}
+              />
+            )}
           </div>
 
           {/* Stats Sidebar */}
