@@ -49,17 +49,13 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
   doc.setFont('helvetica', 'bold');
   doc.text('CONGREGAÇÃO CRISTÃ NO BRASIL', pageWidth / 2, 10, { align: 'center' });
   
-  // Subheader - ENSAIO REGIONAL
-  doc.setFontSize(10);
-  doc.text('ENSAIO REGIONAL', pageWidth / 2, 16, { align: 'center' });
-  
   // Top section table with meeting type, city and date (only meeting info, not date)
   const meetingType = eventData.meeting_name || '';
   const city = eventData.cidade || '';
   const displayLocation = `${meetingType}${meetingType && city ? ' - ' : ''}${city}`;
   
   autoTable(doc, {
-    startY: 20,
+    startY: 14,
     head: [],
     body: [[
       { content: displayLocation, styles: { halign: 'center', fontStyle: 'bold' as const } },
@@ -206,30 +202,30 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     const groupCount = groupTotals[group] || 0;
     const groupPercentage = grandTotal > 0 ? Math.round((groupCount / grandTotal) * 100) : 0;
     
-    // Get actual instruments that have attendance
-    const actualInstruments = instruments.map(instrument => {
+    // Get all instruments with their counts
+    const allInstruments = instruments.map(instrument => {
       const count = instrumentCounts[group]?.[instrument] || 0;
       return { name: instrument, count };
     });
     
-    let firstInstrument = true;
-    actualInstruments.forEach(({ name: instrument, count }) => {
-      if (firstInstrument) {
+    allInstruments.forEach(({ name: instrument, count }, index) => {
+      if (index === 0) {
+        // First row of the group with rowSpan
         instrumentRows.push([
-          { content: group, rowSpan: actualInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
+          { content: group, rowSpan: allInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
           { content: instrument, styles: { halign: 'left' as const } },
           { content: count, styles: { halign: 'center' as const, fontStyle: 'bold' as const } },
-          { content: groupCount, rowSpan: actualInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
-          { content: `${groupPercentage}%`, rowSpan: actualInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } }
+          { content: groupCount, rowSpan: allInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
+          { content: `${groupPercentage}%`, rowSpan: allInstruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } }
         ]);
-        firstInstrument = false;
       } else {
+        // Subsequent rows without group, total, and percentage columns
         instrumentRows.push([
-          { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
+          '',
           { content: instrument, styles: { halign: 'left' as const } },
           { content: count, styles: { halign: 'center' as const, fontStyle: 'bold' as const } },
-          { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
-          { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } }
+          '',
+          ''
         ]);
       }
     });
@@ -342,7 +338,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     { content: 'Total Geral de Instrumentos', styles: { fontStyle: 'bold' as const } },
     { content: grandTotal, styles: { fontStyle: 'bold' as const, halign: 'center' as const } },
     { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
-    { content: 'Hinos:', rowSpan: 2, styles: { valign: 'middle' as const, fontStyle: 'bold' as const } }
+    { content: 'Hinos:', rowSpan: 3, styles: { valign: 'middle' as const, fontStyle: 'bold' as const } }
   ]);
   
   // Row 2: Total de Organistas / Cantado
@@ -350,7 +346,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     { content: 'Total de Organistas', styles: { fontStyle: 'bold' as const } },
     { content: eventData.quantidade_organistas || 0, styles: { fontStyle: 'bold' as const, halign: 'center' as const } },
     { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
-    { content: `${cantadosLabel}: ${hinosCantados}` }
+    { content: hinosCantados ? `${cantadosLabel}: ${hinosCantados}` : '' }
   ]);
   
   // Row 3: Total Geral do Ensaio / Ensaiados
@@ -358,7 +354,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     { content: 'Total Geral do Ensaio', styles: { fontStyle: 'bold' as const } },
     { content: grandTotal + (eventData.quantidade_organistas || 0), styles: { fontStyle: 'bold' as const, halign: 'center' as const } },
     { content: '', styles: { fillColor: [255, 255, 255], lineWidth: 0 } },
-    { content: `${ensaiadosLabel}: ${hinosEnsaiados}` }
+    { content: hinosEnsaiados ? `${ensaiadosLabel}: ${hinosEnsaiados}` : '' }
   ]);
   
   // Calculate total hymns

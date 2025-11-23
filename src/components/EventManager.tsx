@@ -9,9 +9,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Plus, XCircle, FileText, Edit, Trash2 } from "lucide-react";
+import { Calendar, Plus, XCircle, FileText, Edit, Trash2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { generateEventPDF } from "@/utils/generateEventPDF";
+import { generateEventCSV } from "@/utils/generateEventCSV";
 
 interface EventManagerProps {
   currentSession: any;
@@ -141,6 +142,22 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
 
     generateEventPDF(session, attendances || []);
     toast.success("Relatório PDF gerado com sucesso!");
+  };
+
+  const handleGenerateCSV = async (session: any) => {
+    const { data: attendances, error } = await supabase
+      .from('attendances')
+      .select('*, musician:musicians(*)')
+      .eq('meeting_session_id', session.id);
+
+    if (error) {
+      toast.error("Erro ao carregar dados para exportação");
+      console.error(error);
+      return;
+    }
+
+    generateEventCSV(session, attendances || []);
+    toast.success("CSV gerado com sucesso!");
   };
 
   const handleEditSession = (session: any) => {
@@ -462,6 +479,15 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleGenerateCSV(session)}
+                              className="flex-shrink-0 text-xs sm:text-sm"
+                            >
+                              <Download className="w-4 h-4 sm:mr-2" />
+                              <span className="hidden sm:inline">CSV</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleEditSession(session)}
                               className="flex-shrink-0 text-xs sm:text-sm"
                             >
@@ -525,6 +551,15 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                                   >
                                     <FileText className="w-4 h-4 sm:mr-2" />
                                     <span className="hidden sm:inline">PDF</span>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleGenerateCSV(session)}
+                                    className="flex-shrink-0 text-xs sm:text-sm"
+                                  >
+                                    <Download className="w-4 h-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">CSV</span>
                                   </Button>
                                   <Button
                                     variant="ghost"
