@@ -60,11 +60,14 @@ export type Database = {
           created_at: string | null
           demais_irmaos: string | null
           examinadora: string | null
+          hinos_cantados: number | null
+          hinos_ensaiados: number | null
           id: string
           meeting_date: string
           meeting_name: string | null
           observacao: string | null
           palavra: string | null
+          quantidade_organistas: number | null
           regencia_enc_regional_1: string | null
           regencia_enc_regional_2: string | null
           status: string | null
@@ -75,11 +78,14 @@ export type Database = {
           created_at?: string | null
           demais_irmaos?: string | null
           examinadora?: string | null
+          hinos_cantados?: number | null
+          hinos_ensaiados?: number | null
           id?: string
           meeting_date?: string
           meeting_name?: string | null
           observacao?: string | null
           palavra?: string | null
+          quantidade_organistas?: number | null
           regencia_enc_regional_1?: string | null
           regencia_enc_regional_2?: string | null
           status?: string | null
@@ -90,11 +96,14 @@ export type Database = {
           created_at?: string | null
           demais_irmaos?: string | null
           examinadora?: string | null
+          hinos_cantados?: number | null
+          hinos_ensaiados?: number | null
           id?: string
           meeting_date?: string
           meeting_name?: string | null
           observacao?: string | null
           palavra?: string | null
+          quantidade_organistas?: number | null
           regencia_enc_regional_1?: string | null
           regencia_enc_regional_2?: string | null
           status?: string | null
