@@ -253,20 +253,21 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="eventName">Nome do Evento *</Label>
+                    <Label htmlFor="eventName">Tipo de Reunião *</Label>
                     <Input
                       id="eventName"
-                      placeholder="Ex: ENSAIO REGIONAL"
+                      placeholder="Ex: Reunião Madeira, Ensaio Cordas"
                       value={newEventName}
                       onChange={(e) => setNewEventName(e.target.value)}
                     />
+                    <p className="text-xs text-muted-foreground">Apenas o nome da reunião, sem data</p>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="cidade">Cidade</Label>
                     <Input
                       id="cidade"
-                      placeholder="Ex: RINCÃO - SP"
+                      placeholder="Ex: ARARAQUARA - SP"
                       value={newEventData.cidade}
                       onChange={(e) => setNewEventData({...newEventData, cidade: e.target.value})}
                     />
@@ -359,7 +360,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="hinos_cantados">Hinos Cantados</Label>
+                    <Label htmlFor="hinos_cantados">Hino(s) Cantado(s)</Label>
                     <Input
                       id="hinos_cantados"
                       type="text"
@@ -367,10 +368,11 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                       value={newEventData.hinos_cantados}
                       onChange={(e) => setNewEventData({...newEventData, hinos_cantados: e.target.value})}
                     />
+                    <p className="text-xs text-muted-foreground">Separe por vírgula se houver mais de um</p>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="hinos_ensaiados">Hinos Ensaiados</Label>
+                    <Label htmlFor="hinos_ensaiados">Hino(s) Ensaiado(s)</Label>
                     <Input
                       id="hinos_ensaiados"
                       type="text"
@@ -378,6 +380,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                       value={newEventData.hinos_ensaiados}
                       onChange={(e) => setNewEventData({...newEventData, hinos_ensaiados: e.target.value})}
                     />
+                    <p className="text-xs text-muted-foreground">Separe por vírgula se houver mais de um</p>
                   </div>
                   
                   <div className="space-y-2">
@@ -676,7 +679,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                 <Label htmlFor="edit_cidade">Cidade</Label>
                 <Input
                   id="edit_cidade"
-                  placeholder="Ex: RINCÃO - SP"
+                  placeholder="Ex: ARARAQUARA - SP"
                   value={editingSession.cidade || ""}
                   onChange={(e) => setEditingSession({...editingSession, cidade: e.target.value})}
                 />
@@ -684,7 +687,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit_hinos_cantados">Hinos Cantados</Label>
+                  <Label htmlFor="edit_hinos_cantados">Hino(s) Cantado(s)</Label>
                   <Input
                     id="edit_hinos_cantados"
                     type="text"
@@ -692,10 +695,11 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                     value={editingSession.hinos_cantados || ""}
                     onChange={(e) => setEditingSession({...editingSession, hinos_cantados: e.target.value})}
                   />
+                  <p className="text-xs text-muted-foreground">Separe por vírgula se houver mais de um</p>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="edit_hinos_ensaiados">Hinos Ensaiados</Label>
+                  <Label htmlFor="edit_hinos_ensaiados">Hino(s) Ensaiado(s)</Label>
                   <Input
                     id="edit_hinos_ensaiados"
                     type="text"
@@ -703,6 +707,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                     value={editingSession.hinos_ensaiados || ""}
                     onChange={(e) => setEditingSession({...editingSession, hinos_ensaiados: e.target.value})}
                   />
+                  <p className="text-xs text-muted-foreground">Separe por vírgula se houver mais de um</p>
                 </div>
                 
                 <div className="space-y-2">
