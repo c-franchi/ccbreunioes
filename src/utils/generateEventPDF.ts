@@ -15,6 +15,16 @@ interface EventData {
   hinos_ensaiados?: string;
   quantidade_organistas?: number;
   cidade?: string;
+  
+  // Campos de ministério presente
+  ministerio_anciaes?: number;
+  ministerio_diaconos?: number;
+  ministerio_cooperadores?: number;
+  ministerio_coop_jovens?: number;
+  ministerio_enc_regionais?: number;
+  ministerio_enc_locais?: number;
+  ministerio_examinadoras?: number;
+  ministerio_administracao?: number;
 }
 
 interface AttendanceData {
@@ -25,22 +35,42 @@ interface AttendanceData {
   };
 }
 
-// Instrument groupings - ordem exata da imagem
+// Grupos de instrumentos iguais ao modelo
 const INSTRUMENT_GROUPS = {
-  'Cordas': ['Violino', 'Violoncelo', 'Flauta', 'Oboé', "Oboé D'Amore", 'Corne Inglês', 'Clarinete', 'Clarinete Alto', 'Clarinete Baixo', 'Fagote'],
-  'Madeiras': ['Saxofone Soprano', 'Saxofone Alto', 'Saxofone Tenor', 'Saxofone Baritono', 'Trompete / Cornet', 'Flugelhom'],
-  'Metais': ['Trombone / Trombonito', 'Trompa', 'Eufônio', 'Tuba', 'Acordeon', 'Não Incluído no MOD']
+  Cordas: ['Violino', 'Viola', 'Violoncelo'],
+  Madeiras: [
+    'Flauta',
+    'Oboé',
+    "Oboé D'Amore",
+    'Corne Inglês',
+    'Clarinete',
+    'Clarinete Alto',
+    'Clarinete Baixo',
+    'Fagote',
+    'Saxofone Soprano',
+    'Saxofone Alto',
+    'Saxofone Tenor',
+    'Saxofone Baritono'
+  ],
+  Metais: [
+    'Trompete / Cornet',
+    'Flugelhom',
+    'Trompa',
+    'Trombone / Trombonito',
+    'Baritono',
+    'Eufônio',
+    'Tuba',
+    'Acordeon'
+  ],
+  Outros: ['Não Incluído no MOD']
 };
 
 export const generateEventPDF = (eventData: EventData, attendances: AttendanceData[]) => {
   // Count instruments
   const instrumentCounts: Record<string, Record<string, number>> = {};
-  const ministryCounts: Record<string, number> = {};
-  
   
   attendances.forEach((att) => {
     const instrument = att.musician.instrument;
-    const ministry = att.musician.cargo_ministerio || 'Não especificado';
     
     for (const [group, instruments] of Object.entries(INSTRUMENT_GROUPS)) {
       const matchedInstrument = instruments.find(i => 
@@ -57,8 +87,6 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
         break;
       }
     }
-    
-    ministryCounts[ministry] = (ministryCounts[ministry] || 0) + 1;
   });
   
   // Calculate totals
@@ -69,260 +97,248 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     groupTotals[group] = Object.values(instruments).reduce((sum, count) => sum + count, 0);
   });
   
-  // Build ministry rows
-  const ministryRows = Object.entries(ministryCounts)
-    .sort(([a], [b]) => {
-      const order = ['Anciães', 'Cooperadores', 'Coop. Jovens', 'Enc. Regionais', 'Enc. Locais', 'Examinadora', 'Administração'];
-      const aIndex = order.findIndex(o => a.includes(o));
-      const bIndex = order.findIndex(o => b.includes(o));
-      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
-      if (aIndex === -1) return 1;
-      if (bIndex === -1) return -1;
-      return aIndex - bIndex;
-    });
-  
   // Create HTML
   const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        body {
-          font-family: Arial, sans-serif;
-          font-size: 9px;
-          line-height: 1.2;
-          padding: 10px;
-        }
-        .container {
-          width: 100%;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-        .header {
-          text-align: center;
-          font-weight: bold;
-          font-size: 11px;
-          margin-bottom: 5px;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 3px;
-        }
-        td, th {
-          border: 1px solid #000;
-          padding: 2px 4px;
-          vertical-align: middle;
-        }
-        .top-table td {
-          font-weight: bold;
-          text-align: center;
-          font-size: 9px;
-        }
-        .top-table td:first-child {
-          width: 20%;
-        }
-        .top-table td:nth-child(2) {
-          width: 60%;
-          background-color: #FFF8DC;
-        }
-        .top-table td:last-child {
-          width: 20%;
-        }
-        .attendance-table td:first-child {
-          font-weight: bold;
-          text-align: center;
-          width: 15%;
-        }
-        .attendance-table td:nth-child(2) {
-          width: 20%;
-        }
-        .attendance-table td:nth-child(3) {
-          width: 65%;
-        }
-        .demais-table td:first-child {
-          font-weight: bold;
-          width: 25%;
-        }
-        .demais-table td:nth-child(2) {
-          width: 50%;
-          font-size: 8px;
-        }
-        .demais-table td:last-child {
-          width: 25%;
-          font-size: 8px;
-        }
-        .main-table th {
-          background-color: #f0f0f0;
-          font-weight: bold;
-          text-align: center;
-          font-size: 8px;
-          padding: 3px 2px;
-        }
-        .main-table td {
-          font-size: 8px;
-        }
-        .naipe-cell {
-          font-weight: bold;
-          text-align: center;
-          vertical-align: middle;
-        }
-        .instrument-cell {
-          padding-left: 8px;
-        }
-        .number-cell {
-          text-align: center;
-          font-weight: bold;
-        }
-        .ministry-cell {
-          padding-left: 8px;
-        }
-        .total-row {
-          background-color: #f0f0f0;
-          font-weight: bold;
-        }
-        .bottom-table td {
-          font-size: 9px;
-        }
-        .bottom-table td:first-child {
-          font-weight: bold;
-          width: 35%;
-        }
-        .bottom-table td:nth-child(2) {
-          text-align: center;
-          font-weight: bold;
-          width: 15%;
-        }
-        .bottom-table td:last-child {
-          width: 50%;
-        }
-        .hinos-section {
-          background-color: #E6E6FA;
-          padding: 5px;
-          font-size: 8px;
-        }
-        .hinos-title {
-          font-weight: bold;
-          text-align: center;
-          margin-bottom: 3px;
-        }
-        .observacao-cell {
-          font-size: 8px;
-          padding: 5px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">CONGREGAÇÃO CRISTÃ NO BRASIL</div>
-        
-        <table class="top-table">
-          <tr>
-            <td>${eventData.meeting_name || ''}</td>
-            <td>${eventData.cidade || ''}</td>
-            <td>Data:<br>${new Date(eventData.meeting_date).toLocaleDateString('pt-BR')}</td>
-          </tr>
-        </table>
-        
-        <table class="attendance-table">
-          <tr>
-            <td rowspan="4">Atendimento:</td>
-            <td>Ancião:</td>
-            <td>${eventData.anciao || ''}</td>
-          </tr>
-          <tr>
-            <td>Regência Enc. Regional 1:</td>
-            <td>${eventData.regencia_enc_regional_1 || ''}</td>
-          </tr>
-          <tr>
-            <td>Regência Enc. Regional 2:</td>
-            <td>${eventData.regencia_enc_regional_2 || ''}</td>
-          </tr>
-          <tr>
-            <td>Examinadora:</td>
-            <td>${eventData.examinadora || ''}</td>
-          </tr>
-          ${eventData.ancioes_presentes ? `
-          <tr>
-            <td></td>
-            <td>Anciães:</td>
-            <td>${eventData.ancioes_presentes}</td>
-          </tr>
-          ` : ''}
-        </table>
-        
-        <table class="demais-table">
-          <tr>
-            <td>Demais Irmãos Presentes:</td>
-            <td>${eventData.demais_irmaos || ''}</td>
-            <td>Palavra:<br>${eventData.palavra || ''}</td>
-          </tr>
-        </table>
-        
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 9px;
+      line-height: 1.2;
+      padding: 15px 20px;
+    }
+    .header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .subheader {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 4px;
+    }
+    td, th {
+      border: 1px solid #000;
+      padding: 2px 4px;
+      vertical-align: middle;
+    }
+    .top-table td {
+      border: none;
+      font-size: 9px;
+    }
+    .top-table td.label {
+      width: 28%;
+      font-weight: bold;
+    }
+    .top-table td.value {
+      width: 72%;
+    }
+    .linha-cab {
+      width: 100%;
+      margin-bottom: 4px;
+      font-size: 9px;
+    }
+    .linha-cab td {
+      border: none;
+      padding: 1px 2px;
+    }
+    .linha-cab td:first-child {
+      width: 60%;
+      font-weight: bold;
+    }
+    .linha-cab td:last-child {
+      text-align: right;
+    }
+
+    .main-row {
+      width: 100%;
+    }
+    .col-esq {
+      width: 70%;
+      vertical-align: top;
+      padding-right: 6px;
+    }
+    .col-dir {
+      width: 30%;
+      vertical-align: top;
+      padding-left: 6px;
+    }
+
+    .main-table th {
+      background-color: #f0f0f0;
+      text-align: center;
+      font-size: 8px;
+      padding: 3px 2px;
+    }
+    .main-table td {
+      font-size: 8px;
+    }
+    .naipe-cell {
+      font-weight: bold;
+      text-align: center;
+    }
+    .instrument-cell {
+      padding-left: 6px;
+    }
+    .number-cell {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .ministerio-table th {
+      background-color: #f0f0f0;
+      font-size: 8px;
+      text-align: center;
+    }
+    .ministerio-table td {
+      font-size: 8px;
+      padding: 2px 4px;
+    }
+    .ministerio-table td:first-child {
+      width: 70%;
+    }
+    .ministerio-table td:last-child {
+      width: 30%;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .total-row {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+
+    .bottom-totals td {
+      font-size: 9px;
+      padding: 2px 4px;
+    }
+    .bottom-totals td.label {
+      font-weight: bold;
+      width: 60%;
+    }
+    .bottom-totals td.value {
+      width: 40%;
+      text-align: right;
+    }
+
+    .hinos-box {
+      margin-top: 4px;
+      border: 1px solid #000;
+      padding: 3px 4px;
+      font-size: 8px;
+    }
+    .hinos-box-title {
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .observacao-cell {
+      font-size: 8px;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">CONGREGAÇÃO CRISTÃ NO BRASIL</div>
+  <table class="linha-cab">
+    <tr>
+      <td>ENSAIO ${eventData.meeting_name || ''} – ${eventData.cidade || ''}</td>
+      <td>Data: ${new Date(eventData.meeting_date).toLocaleDateString('pt-BR')}</td>
+    </tr>
+  </table>
+
+  <table class="top-table">
+    <tr><td class="label">Ancião:</td><td class="value">${eventData.anciao || ''}</td></tr>
+    <tr><td class="label">Regência Enc. Regional 1:</td><td class="value">${eventData.regencia_enc_regional_1 || ''}</td></tr>
+    <tr><td class="label">Regência Enc. Regional 2:</td><td class="value">${eventData.regencia_enc_regional_2 || ''}</td></tr>
+    <tr><td class="label">Examinadora:</td><td class="value">${eventData.examinadora || ''}</td></tr>
+    <tr><td class="label">Demais Irmãos Presentes:</td><td class="value">${eventData.demais_irmaos || ''}</td></tr>
+    <tr><td class="label">Palavra:</td><td class="value">${eventData.palavra || ''}</td></tr>
+  </table>
+
+  <table class="main-row">
+    <tr>
+      <td class="col-esq">
         <table class="main-table">
           <thead>
             <tr>
-              <th style="width: 10%;">Naipes</th>
-              <th style="width: 22%;">Instrumentos</th>
-              <th style="width: 10%;">Qtde<br>Instrumentos</th>
-              <th style="width: 10%;">Qtde<br>Naipes</th>
-              <th style="width: 8%;">%</th>
-              <th style="width: 25%;">Ministério<br>Presente</th>
-              <th style="width: 10%;">Qtde</th>
+              <th style="width:12%;">Naipes</th>
+              <th style="width:44%;">Instrumentos</th>
+              <th style="width:15%;">Qtde Instrumentos</th>
+              <th style="width:15%;">Qtde Naipes</th>
+              <th style="width:14%;">%</th>
             </tr>
           </thead>
           <tbody>
-            ${generateInstrumentRows(INSTRUMENT_GROUPS, instrumentCounts, groupTotals, grandTotal, ministryRows)}
+            ${generateInstrumentRows(INSTRUMENT_GROUPS, instrumentCounts, groupTotals, grandTotal)}
             <tr class="total-row">
-              <td colspan="2" style="text-align: center;">Total Geral de Instrumentos</td>
+              <td colspan="2" style="text-align:center;">Total Geral de Instrumentos</td>
               <td class="number-cell">${grandTotal}</td>
               <td></td>
-              <td class="number-cell">100%</td>
-              <td></td>
-              <td></td>
+              <td class="number-cell">${grandTotal > 0 ? '100%' : '0%'}</td>
             </tr>
             ${eventData.observacao ? `
             <tr>
-              <td colspan="7" class="observacao-cell">
-                <strong>Observação:</strong><br>${eventData.observacao}
+              <td colspan="5" class="observacao-cell">
+                <strong>Observação:</strong> ${eventData.observacao}
               </td>
-            </tr>
-            ` : ''}
+            </tr>` : ''}
           </tbody>
         </table>
-        
-        <table class="bottom-table">
+
+        <table class="bottom-totals">
           <tr>
-            <td>Total de Organistas</td>
-            <td>${eventData.quantidade_organistas || 0}</td>
-            <td rowspan="3">
-              <div class="hinos-section">
-                <div class="hinos-title">Hinos:</div>
-                ${eventData.hinos_cantados ? `<div><strong>Cantado:</strong> ${eventData.hinos_cantados}</div>` : ''}
-                ${eventData.hinos_ensaiados ? `<div><strong>Ensaiados:</strong> ${eventData.hinos_ensaiados}</div>` : ''}
-                <div style="margin-top: 5px;"><strong>Total de Hinos: ${countTotalHinos(eventData.hinos_cantados, eventData.hinos_ensaiados)}</strong></div>
-              </div>
-            </td>
+            <td class="label">Total de Organistas</td>
+            <td class="value">${eventData.quantidade_organistas || 0}</td>
           </tr>
           <tr>
-            <td>Total Geral do Ensaio</td>
-            <td>${grandTotal + (eventData.quantidade_organistas || 0)}</td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
+            <td class="label">Total Geral do Ensaio</td>
+            <td class="value">${grandTotal + (eventData.quantidade_organistas || 0)}</td>
           </tr>
         </table>
-      </div>
-    </body>
-    </html>
-  `;
+      </td>
+
+      <td class="col-dir">
+        <table class="ministerio-table">
+          <tr><th>Ministério Presente</th><th>Qtde</th></tr>
+          <tr><td>Anciães</td><td>${eventData.ministerio_anciaes || 0}</td></tr>
+          <tr><td>Diáconos</td><td>${eventData.ministerio_diaconos || 0}</td></tr>
+          <tr><td>Cooperadores</td><td>${eventData.ministerio_cooperadores || 0}</td></tr>
+          <tr><td>Coop. Jovens</td><td>${eventData.ministerio_coop_jovens || 0}</td></tr>
+          <tr><td>Enc. Regionais</td><td>${eventData.ministerio_enc_regionais || 0}</td></tr>
+          <tr><td>Enc. Locais</td><td>${eventData.ministerio_enc_locais || 0}</td></tr>
+          <tr><td>Examinadoras</td><td>${eventData.ministerio_examinadoras || 0}</td></tr>
+          <tr><td>Administração</td><td>${eventData.ministerio_administracao || 0}</td></tr>
+        </table>
+
+        <div class="hinos-box">
+          <div class="hinos-box-title">Hinos:</div>
+          ${eventData.hinos_cantados ? `<div><strong>Cantado:</strong> ${eventData.hinos_cantados}</div>` : ''}
+          ${eventData.hinos_ensaiados ? `<div><strong>Ensaiados:</strong> ${eventData.hinos_ensaiados}</div>` : ''}
+          <div style="margin-top:3px;">
+            <strong>Total de Hinos: ${countTotalHinos(eventData.hinos_cantados, eventData.hinos_ensaiados)}</strong>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
   
   // Convert HTML to PDF using jsPDF
   const doc = new jsPDF({
@@ -348,55 +364,36 @@ function generateInstrumentRows(
   groups: Record<string, string[]>,
   instrumentCounts: Record<string, Record<string, number>>,
   groupTotals: Record<string, number>,
-  grandTotal: number,
-  ministryRows: [string, number][]
+  grandTotal: number
 ): string {
   let html = '';
-  let rowIndex = 0;
-  
+
   Object.entries(groups).forEach(([group, instruments]) => {
     const groupCount = groupTotals[group] || 0;
     const groupPercentage = grandTotal > 0 ? Math.round((groupCount / grandTotal) * 100) : 0;
-    
+
     instruments.forEach((instrument, index) => {
       const count = instrumentCounts[group]?.[instrument] || 0;
       const isFirstInGroup = index === 0;
-      
+
       html += '<tr>';
-      
+
       if (isFirstInGroup) {
         html += `<td class="naipe-cell" rowspan="${instruments.length}">${group}</td>`;
       }
-      
+
       html += `<td class="instrument-cell">${instrument}</td>`;
       html += `<td class="number-cell">${count}</td>`;
-      
+
       if (isFirstInGroup) {
         html += `<td class="number-cell" rowspan="${instruments.length}">${groupCount}</td>`;
         html += `<td class="number-cell" rowspan="${instruments.length}">${groupPercentage}%</td>`;
       }
-      
-      // Ministry column
-      if (rowIndex === 0) {
-        html += `<td style="text-align: center; font-weight: bold;">Anciães</td>`;
-        html += `<td class="number-cell">${ministryRows.find(([m]) => m.includes('Anciães'))?.[1] || 0}</td>`;
-      } else if (rowIndex < ministryRows.length + 1) {
-        const ministry = ministryRows[rowIndex - 1];
-        if (ministry) {
-          html += `<td class="ministry-cell">${ministry[0]}</td>`;
-          html += `<td class="number-cell">${ministry[1]}</td>`;
-        } else {
-          html += `<td></td><td></td>`;
-        }
-      } else {
-        html += `<td></td><td></td>`;
-      }
-      
+
       html += '</tr>';
-      rowIndex++;
     });
   });
-  
+
   return html;
 }
 
