@@ -187,7 +187,7 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     groupTotals[group] = Object.values(instruments).reduce((sum, count) => sum + count, 0);
   });
   
-  // Main instruments table
+  // Main instruments table - with individual counts
   const instrumentRows: any[][] = [];
   
   Object.entries(INSTRUMENT_GROUPS).forEach(([group, instruments]) => {
@@ -200,15 +200,21 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
       
       if (firstInstrument) {
         instrumentRows.push([
-          { content: group, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const } },
+          { content: group, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
           instrument,
-          count,
-          { content: groupCount, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const } },
-          { content: `${groupPercentage}%`, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const } }
+          { content: count, styles: { halign: 'center' as const } },
+          { content: groupCount, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } },
+          { content: `${groupPercentage}%`, rowSpan: instruments.length, styles: { valign: 'middle' as const, fontStyle: 'bold' as const, halign: 'center' as const } }
         ]);
         firstInstrument = false;
       } else {
-        instrumentRows.push(['', instrument, count, '', '']);
+        instrumentRows.push([
+          '',
+          instrument,
+          { content: count, styles: { halign: 'center' as const } },
+          '',
+          ''
+        ]);
       }
     });
   });
@@ -281,16 +287,16 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     head: [['Naipes', 'Instrumentos', 'Qtde\nInstrumentos', 'Qtde\nNaipes', '%', 'Ministério\nPresente', 'Qtde']],
     body: combinedRows,
     theme: 'grid',
-    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold' as const, lineWidth: 0.3, halign: 'center' as const },
-    styles: { fontSize: 7, cellPadding: 1, lineWidth: 0.3 },
+    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold' as const, lineWidth: 0.3, halign: 'center' as const, fontSize: 6 },
+    styles: { fontSize: 6, cellPadding: 0.5, lineWidth: 0.3 },
     columnStyles: {
-      0: { cellWidth: 20, halign: 'center' as const },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 15, halign: 'center' as const },
-      3: { cellWidth: 15, halign: 'center' as const },
-      4: { cellWidth: 10, halign: 'center' as const },
-      5: { cellWidth: 45 },
-      6: { cellWidth: 15, halign: 'center' as const }
+      0: { cellWidth: 18, halign: 'center' as const },
+      1: { cellWidth: 32 },
+      2: { cellWidth: 12, halign: 'center' as const },
+      3: { cellWidth: 12, halign: 'center' as const },
+      4: { cellWidth: 8, halign: 'center' as const },
+      5: { cellWidth: 40 },
+      6: { cellWidth: 12, halign: 'center' as const }
     }
   });
   
