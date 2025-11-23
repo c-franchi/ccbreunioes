@@ -147,9 +147,10 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
       border-collapse: collapse;
       width: 100%;
       margin-bottom: 4px;
+      border: 1px solid #000;
     }
     td, th {
-      border: 1px solid #000;
+      border: 1px solid #000 !important;
       padding: 2px 4px;
       vertical-align: middle;
     }
@@ -183,25 +184,30 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
 
     .main-row {
       width: 100%;
+      border-collapse: collapse;
+    }
+    .main-row td {
+      border: 1px solid #000;
+      vertical-align: top;
     }
     .col-esq {
       width: 70%;
-      vertical-align: top;
-      padding-right: 6px;
+      padding: 6px;
     }
     .col-dir {
       width: 30%;
-      vertical-align: top;
-      padding-left: 6px;
+      padding: 6px;
     }
 
     .main-table {
       border-collapse: collapse;
+      border: 1px solid #000;
+      width: 100%;
     }
 
     .main-table th,
     .main-table td {
-      border: 1px solid #000;
+      border: 1px solid #000 !important;
       font-size: 8px;
     }
 
@@ -227,14 +233,21 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
       font-weight: bold;
     }
 
-    .ministerio-table th {
-      background-color: #f0f0f0;
-      font-size: 8px;
-      text-align: center;
+    .ministerio-table {
+      border-collapse: collapse;
+      border: 1px solid #000;
+      width: 100%;
     }
+    .ministerio-table th,
     .ministerio-table td {
+      border: 1px solid #000 !important;
       font-size: 8px;
       padding: 2px 4px;
+    }
+    .ministerio-table th {
+      background-color: #f0f0f0;
+      text-align: center;
+      font-weight: bold;
     }
     .ministerio-table td:first-child {
       width: 70%;
@@ -250,7 +263,13 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
       font-weight: bold;
     }
 
+    .bottom-totals {
+      border-collapse: collapse;
+      border: 1px solid #000;
+      width: 100%;
+    }
     .bottom-totals td {
+      border: 1px solid #000 !important;
       font-size: 9px;
       padding: 2px 4px;
     }
@@ -384,7 +403,13 @@ export const generateEventPDF = (eventData: EventData, attendances: AttendanceDa
     x: 10,
     y: 10,
     width: 190,
-    windowWidth: 800
+    windowWidth: 800,
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      letterRendering: true
+    }
   });
 };
 
