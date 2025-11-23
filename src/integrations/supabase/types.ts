@@ -55,24 +55,48 @@ export type Database = {
       }
       meeting_sessions: {
         Row: {
+          anciao: string | null
+          ancioes_presentes: string | null
           created_at: string | null
+          demais_irmaos: string | null
+          examinadora: string | null
           id: string
           meeting_date: string
           meeting_name: string | null
+          observacao: string | null
+          palavra: string | null
+          regencia_enc_regional_1: string | null
+          regencia_enc_regional_2: string | null
           status: string | null
         }
         Insert: {
+          anciao?: string | null
+          ancioes_presentes?: string | null
           created_at?: string | null
+          demais_irmaos?: string | null
+          examinadora?: string | null
           id?: string
           meeting_date?: string
           meeting_name?: string | null
+          observacao?: string | null
+          palavra?: string | null
+          regencia_enc_regional_1?: string | null
+          regencia_enc_regional_2?: string | null
           status?: string | null
         }
         Update: {
+          anciao?: string | null
+          ancioes_presentes?: string | null
           created_at?: string | null
+          demais_irmaos?: string | null
+          examinadora?: string | null
           id?: string
           meeting_date?: string
           meeting_name?: string | null
+          observacao?: string | null
+          palavra?: string | null
+          regencia_enc_regional_1?: string | null
+          regencia_enc_regional_2?: string | null
           status?: string | null
         }
         Relationships: []
