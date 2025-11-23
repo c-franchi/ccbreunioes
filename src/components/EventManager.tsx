@@ -31,8 +31,8 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     palavra: "",
     demais_irmaos: "",
     observacao: "",
-    hinos_cantados: 0,
-    hinos_ensaiados: 0,
+    hinos_cantados: "",
+    hinos_ensaiados: "",
     quantidade_organistas: 0
   });
   const [loading, setLoading] = useState(false);
@@ -113,8 +113,8 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
         palavra: "",
         demais_irmaos: "",
         observacao: "",
-        hinos_cantados: 0,
-        hinos_ensaiados: 0,
+        hinos_cantados: "",
+        hinos_ensaiados: "",
         quantidade_organistas: 0
       });
       setShowCreateDialog(false);
@@ -217,13 +217,14 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
       console.error(error);
     } else {
       toast.success("Evento excluído com sucesso!");
-      loadOpenSessions();
-      loadClosedSessions();
+      setSessionToDelete(null);
       if (currentSession?.id === sessionToDelete) {
         onSessionChange(null);
       }
+      // Recarregar as listas após fechar o dialog
+      await loadClosedSessions();
+      await loadOpenSessions();
     }
-    setSessionToDelete(null);
   };
 
   return (
@@ -345,11 +346,10 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                     <Label htmlFor="hinos_cantados">Hinos Cantados</Label>
                     <Input
                       id="hinos_cantados"
-                      type="number"
-                      min="0"
-                      placeholder="0"
+                      type="text"
+                      placeholder="Ex: 84 ou 328, 52, 248"
                       value={newEventData.hinos_cantados}
-                      onChange={(e) => setNewEventData({...newEventData, hinos_cantados: parseInt(e.target.value) || 0})}
+                      onChange={(e) => setNewEventData({...newEventData, hinos_cantados: e.target.value})}
                     />
                   </div>
                   
@@ -357,11 +357,10 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                     <Label htmlFor="hinos_ensaiados">Hinos Ensaiados</Label>
                     <Input
                       id="hinos_ensaiados"
-                      type="number"
-                      min="0"
-                      placeholder="0"
+                      type="text"
+                      placeholder="Ex: 328, 52, 248, 281"
                       value={newEventData.hinos_ensaiados}
-                      onChange={(e) => setNewEventData({...newEventData, hinos_ensaiados: parseInt(e.target.value) || 0})}
+                      onChange={(e) => setNewEventData({...newEventData, hinos_ensaiados: e.target.value})}
                     />
                   </div>
                   
@@ -654,11 +653,10 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                   <Label htmlFor="edit_hinos_cantados">Hinos Cantados</Label>
                   <Input
                     id="edit_hinos_cantados"
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    value={editingSession.hinos_cantados || 0}
-                    onChange={(e) => setEditingSession({...editingSession, hinos_cantados: parseInt(e.target.value) || 0})}
+                    type="text"
+                    placeholder="Ex: 84 ou 328, 52, 248"
+                    value={editingSession.hinos_cantados || ""}
+                    onChange={(e) => setEditingSession({...editingSession, hinos_cantados: e.target.value})}
                   />
                 </div>
                 
@@ -666,11 +664,10 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                   <Label htmlFor="edit_hinos_ensaiados">Hinos Ensaiados</Label>
                   <Input
                     id="edit_hinos_ensaiados"
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    value={editingSession.hinos_ensaiados || 0}
-                    onChange={(e) => setEditingSession({...editingSession, hinos_ensaiados: parseInt(e.target.value) || 0})}
+                    type="text"
+                    placeholder="Ex: 328, 52, 248, 281"
+                    value={editingSession.hinos_ensaiados || ""}
+                    onChange={(e) => setEditingSession({...editingSession, hinos_ensaiados: e.target.value})}
                   />
                 </div>
                 
