@@ -10,7 +10,7 @@ interface AttendanceStatsProps {
 }
 
 export const AttendanceStats = ({ stats }: AttendanceStatsProps) => {
-  if (!stats) {
+  if (!stats || stats.total === 0) {
     return (
       <Card>
         <CardHeader>
@@ -20,7 +20,9 @@ export const AttendanceStats = ({ stats }: AttendanceStatsProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Carregando...</p>
+          <p className="text-sm text-muted-foreground text-center py-4">
+            Nenhuma presença confirmada ainda
+          </p>
         </CardContent>
       </Card>
     );

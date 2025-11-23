@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +34,8 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     observacao: "",
     hinos_cantados: "",
     hinos_ensaiados: "",
-    quantidade_organistas: 0
+    quantidade_organistas: 0,
+    cidade: ""
   });
   const [loading, setLoading] = useState(false);
   const [sessionToClose, setSessionToClose] = useState<string | null>(null);
@@ -115,7 +117,8 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
         observacao: "",
         hinos_cantados: "",
         hinos_ensaiados: "",
-        quantidade_organistas: 0
+        quantidade_organistas: 0,
+        cidade: ""
       });
       setShowCreateDialog(false);
       loadOpenSessions();
@@ -162,7 +165,8 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
         observacao: editingSession.observacao,
         hinos_cantados: editingSession.hinos_cantados,
         hinos_ensaiados: editingSession.hinos_ensaiados,
-        quantidade_organistas: editingSession.quantidade_organistas
+        quantidade_organistas: editingSession.quantidade_organistas,
+        cidade: editingSession.cidade
       })
       .eq('id', editingSession.id);
 
@@ -215,15 +219,15 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
     if (error) {
       toast.error("Erro ao excluir evento");
       console.error(error);
+      setSessionToDelete(null);
     } else {
       toast.success("Evento excluído com sucesso!");
-      setSessionToDelete(null);
       if (currentSession?.id === sessionToDelete) {
         onSessionChange(null);
       }
-      // Recarregar as listas após fechar o dialog
-      await loadClosedSessions();
-      await loadOpenSessions();
+      // Recarregar as listas antes de fechar o dialog
+      await Promise.all([loadClosedSessions(), loadOpenSessions()]);
+      setSessionToDelete(null);
     }
   };
 
@@ -247,14 +251,26 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                 <DialogTitle>Criar Novo Evento</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="eventName">Nome do Evento *</Label>
-                  <Input
-                    id="eventName"
-                    placeholder="Ex: ENSAIO REGIONAL - RINCÃO - SP"
-                    value={newEventName}
-                    onChange={(e) => setNewEventName(e.target.value)}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="eventName">Nome do Evento *</Label>
+                    <Input
+                      id="eventName"
+                      placeholder="Ex: ENSAIO REGIONAL"
+                      value={newEventName}
+                      onChange={(e) => setNewEventName(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="cidade">Cidade</Label>
+                    <Input
+                      id="cidade"
+                      placeholder="Ex: RINCÃO - SP"
+                      value={newEventData.cidade}
+                      onChange={(e) => setNewEventData({...newEventData, cidade: e.target.value})}
+                    />
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -468,56 +484,64 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
             )}
 
             {closedSessions.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-muted-foreground">Eventos Encerrados</h3>
-                {closedSessions.map((session) => {
-                  const attendanceCount = session.attendances?.[0]?.count || 0;
-                  
-                  return (
-                    <Card
-                      key={session.id}
-                      className="opacity-75"
-                    >
-                      <CardContent className="p-3 sm:p-4">
-                        <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <p className="font-semibold break-words">{session.meeting_name}</p>
-                              <Badge variant="secondary">Encerrado</Badge>
-                            </div>
-                            <p className="text-xs sm:text-sm text-muted-foreground">
-                              {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                            <p className="text-xs sm:text-sm text-muted-foreground">
-                              {attendanceCount} presença(s) confirmada(s)
-                            </p>
-                          </div>
-                          <div className="flex gap-2 flex-wrap w-full sm:w-auto">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleGeneratePDF(session)}
-                              className="flex-shrink-0 text-xs sm:text-sm"
-                            >
-                              <FileText className="w-4 h-4 sm:mr-2" />
-                              <span className="hidden sm:inline">PDF</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSessionToDelete(session.id)}
-                              className="flex-shrink-0 text-xs sm:text-sm text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4 sm:mr-2" />
-                              <span className="hidden sm:inline">Excluir</span>
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="closed-events">
+                  <AccordionTrigger className="text-sm font-semibold">
+                    Eventos Encerrados ({closedSessions.length})
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2 pt-2">
+                      {closedSessions.map((session) => {
+                        const attendanceCount = session.attendances?.[0]?.count || 0;
+                        
+                        return (
+                          <Card
+                            key={session.id}
+                            className="opacity-75"
+                          >
+                            <CardContent className="p-3 sm:p-4">
+                              <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <p className="font-semibold break-words">{session.meeting_name}</p>
+                                    <Badge variant="secondary">Encerrado</Badge>
+                                  </div>
+                                  <p className="text-xs sm:text-sm text-muted-foreground">
+                                    {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                  <p className="text-xs sm:text-sm text-muted-foreground">
+                                    {attendanceCount} presença(s) confirmada(s)
+                                  </p>
+                                </div>
+                                <div className="flex gap-2 flex-wrap w-full sm:w-auto">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleGeneratePDF(session)}
+                                    className="flex-shrink-0 text-xs sm:text-sm"
+                                  >
+                                    <FileText className="w-4 h-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">PDF</span>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setSessionToDelete(session.id)}
+                                    className="flex-shrink-0 text-xs sm:text-sm text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">Excluir</span>
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             )}
           </div>
         )}
@@ -645,6 +669,16 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                   value={editingSession.observacao || ""}
                   onChange={(e) => setEditingSession({...editingSession, observacao: e.target.value})}
                   rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_cidade">Cidade</Label>
+                <Input
+                  id="edit_cidade"
+                  placeholder="Ex: RINCÃO - SP"
+                  value={editingSession.cidade || ""}
+                  onChange={(e) => setEditingSession({...editingSession, cidade: e.target.value})}
                 />
               </div>
 

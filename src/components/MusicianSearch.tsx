@@ -171,23 +171,27 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
                   key={musician.id}
                   className="hover:bg-accent/50 transition-colors"
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-1 flex-1">
-                        <h3 className="font-semibold">{musician.name}</h3>
-                        <div className="flex gap-2 flex-wrap">
-                          <Badge variant="secondary">{musician.instrument}</Badge>
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm sm:text-base break-words">{musician.name}</h3>
+                        <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+                          <Badge variant="secondary" className="text-xs">{musician.instrument}</Badge>
                           {musician.cargo_ministerio && (
-                            <Badge variant="outline">{musician.cargo_ministerio}</Badge>
+                            <Badge variant="outline" className="text-xs">{musician.cargo_ministerio}</Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">{musician.localidade}</p>
-                        <p className="text-xs text-muted-foreground">{musician.nivel}</p>
+                        {musician.localidade && (
+                          <p className="text-xs sm:text-sm text-muted-foreground break-words">{musician.localidade}</p>
+                        )}
+                        {musician.nivel && (
+                          <p className="text-xs text-muted-foreground">{musician.nivel}</p>
+                        )}
                       </div>
                       <Button
                         onClick={() => handleCheckIn(musician)}
                         size="sm"
-                        className="flex-shrink-0"
+                        className="flex-shrink-0 w-full sm:w-auto text-xs sm:text-sm"
                         variant={isAlreadyPresent(musician.id) ? "secondary" : "default"}
                         disabled={isAlreadyPresent(musician.id)}
                       >
