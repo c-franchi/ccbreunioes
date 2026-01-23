@@ -41,15 +41,38 @@ const Index = () => {
     };
     loadAttendances();
 
-    // Subscribe to realtime changes
-    const channel = supabase.channel('attendances_changes').on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'attendances',
-      filter: `meeting_session_id=eq.${currentSession.id}`
-    }, () => {
-      loadAttendances();
-    }).subscribe();
+    // Subscribe to realtime changes for INSERT, UPDATE, DELETE
+    const channel = supabase
+      .channel(`attendances_${currentSession.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'attendances',
+        filter: `meeting_session_id=eq.${currentSession.id}`
+      }, () => {
+        loadAttendances();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'attendances',
+        filter: `meeting_session_id=eq.${currentSession.id}`
+      }, () => {
+        loadAttendances();
+      })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'attendances'
+      }, (payload) => {
+        // Handle delete - remove from state directly for immediate UI update
+        setAttendances(prev => {
+          const filtered = prev.filter(att => att.id !== payload.old.id);
+          calculateStats(filtered);
+          return filtered;
+        });
+      })
+      .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
