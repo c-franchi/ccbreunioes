@@ -30,10 +30,9 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
 
     const searchMusicians = async () => {
       setLoading(true);
+      // Usa RPC para busca com unaccent (ignora acentos)
       const { data, error } = await supabase
-        .from('musicians')
-        .select('*')
-        .ilike('name', `%${searchTerm}%`)
+        .rpc('search_musicians_by_name', { search_term: searchTerm })
         .limit(10);
 
       if (error) {
