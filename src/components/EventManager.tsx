@@ -117,6 +117,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
       .from('meeting_sessions')
       .insert({
         meeting_date: meetingDate,
+        meeting_time: selectedTime,
         meeting_name: eventName,
         status: 'aberto',
         ...newEventData
@@ -671,7 +672,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                               {isActive && <Badge variant="default">Ativo</Badge>}
                             </div>
                             <p className="text-xs sm:text-sm text-muted-foreground">
-                              {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              {format(new Date(session.meeting_date + 'T00:00:00'), 'dd/MM/yyyy', { locale: ptBR })} - {session.meeting_time?.substring(0, 5) || '19:00'}
                             </p>
                             <p className="text-xs sm:text-sm text-muted-foreground">
                               {attendanceCount} presença(s) confirmada(s)
@@ -747,7 +748,7 @@ export const EventManager = ({ currentSession, onSessionChange }: EventManagerPr
                                     <Badge variant="secondary">Encerrado</Badge>
                                   </div>
                                   <p className="text-xs sm:text-sm text-muted-foreground">
-                                    {new Date(session.created_at).toLocaleDateString('pt-BR')} - {new Date(session.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                    {format(new Date(session.meeting_date + 'T00:00:00'), 'dd/MM/yyyy', { locale: ptBR })} - {session.meeting_time?.substring(0, 5) || '19:00'}
                                   </p>
                                   <p className="text-xs sm:text-sm text-muted-foreground">
                                     {attendanceCount} presença(s) confirmada(s)

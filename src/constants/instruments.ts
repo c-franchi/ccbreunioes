@@ -2,7 +2,7 @@
 // Mantenha este arquivo atualizado para garantir consistência em todo o sistema
 
 export const INSTRUMENT_GROUPS: Record<string, string[]> = {
-  Cordas: ['Violino', 'Viola', 'Violoncelo'],
+  Cordas: ['Violino', 'Viola', 'Violoncelo', 'Violino Contralto'],
   Madeiras: [
     'Flauta',
     'Oboé',
@@ -29,6 +29,7 @@ export const INSTRUMENT_GROUPS: Record<string, string[]> = {
     'Euphonium',
     'Tuba'
   ],
+  Órgão: ['Órgão'],
   Outros: ['Não Incluído no MOD']
 };
 
