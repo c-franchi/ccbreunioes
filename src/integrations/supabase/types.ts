@@ -69,6 +69,7 @@ export type Database = {
           id: string
           meeting_date: string
           meeting_name: string | null
+          meeting_time: string | null
           ministerio_administracao: number | null
           ministerio_anciaes: number | null
           ministerio_coop_jovens: number | null
@@ -98,6 +99,7 @@ export type Database = {
           id?: string
           meeting_date?: string
           meeting_name?: string | null
+          meeting_time?: string | null
           ministerio_administracao?: number | null
           ministerio_anciaes?: number | null
           ministerio_coop_jovens?: number | null
@@ -127,6 +129,7 @@ export type Database = {
           id?: string
           meeting_date?: string
           meeting_name?: string | null
+          meeting_time?: string | null
           ministerio_administracao?: number | null
           ministerio_anciaes?: number | null
           ministerio_coop_jovens?: number | null
