@@ -161,9 +161,9 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
           </div>
 
           {/* Search Results */}
-          {musicians.length > 0 && (
+          {musicians.filter(m => !isAlreadyPresent(m.id)).length > 0 && (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {musicians.map((musician) => (
+              {musicians.filter(m => !isAlreadyPresent(m.id)).map((musician) => (
                 <Card 
                   key={musician.id}
                   className="hover:bg-accent/50 transition-colors"
