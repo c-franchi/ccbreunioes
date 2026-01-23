@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { INSTRUMENT_GROUPS, normalizeInstrument } from "@/constants/instruments";
 
 interface EventData {
   meeting_name: string;
@@ -37,59 +38,20 @@ interface AttendanceData {
   } | null;
 }
 
-// Grupos de instrumentos iguais ao modelo
-const INSTRUMENT_GROUPS = {
-  Cordas: ['Violino', 'Viola', 'Violoncelo'],
-  Madeiras: [
-    'Flauta',
-    'Oboé',
-    "Oboé D'Amore",
-    'Corne Inglês',
-    'Clarinete',
-    'Clarinete Alto',
-    'Clarinete Baixo',
-    'Fagote',
-    'Saxofone Soprano',
-    'Saxofone Alto',
-    'Saxofone Tenor',
-    'Saxofone Baritono'
-  ],
-  Metais: [
-    'Trompete / Cornet',
-    'Flugelhom',
-    'Trompa',
-    'Trombone / Trombonito',
-    'Baritono',
-    'Eufônio',
-    'Tuba',
-    'Acordeon'
-  ],
-  Outros: ['Não Incluído no MOD']
-};
-
 export const generateEventPDF = (eventData: EventData, attendances: AttendanceData[]) => {
   const tipoContagem = eventData.tipo_contagem || 'instrumento';
   
   // Count instruments
   const instrumentCounts: Record<string, Record<string, number>> = {};
-  
-  // função para normalizar (remove acentos, deixa maiúsculo e tira espaços extras)
-  const normalize = (s: string) =>
-    s
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toUpperCase()
-      .replace(/\s+/g, ' ')
-      .trim();
 
   attendances.forEach((att) => {
     // Handle both musician-based and direct instrument counting
     const rawInstrument = att.musician?.instrument || att.instrument || '';
-    const normInstrument = normalize(rawInstrument);
+    const normInstrument = normalizeInstrument(rawInstrument);
 
     for (const [group, instruments] of Object.entries(INSTRUMENT_GROUPS)) {
       const matchedInstrument = instruments.find((i) => {
-        const normI = normalize(i);
+        const normI = normalizeInstrument(i);
         return (
           normInstrument === normI ||
           normInstrument.startsWith(normI + ' ') ||

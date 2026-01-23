@@ -1,3 +1,5 @@
+import { findInstrumentGroup } from "@/constants/instruments";
+
 interface EventData {
   meeting_name: string;
   meeting_date: string;
@@ -14,44 +16,6 @@ interface AttendanceData {
     localidade?: string;
   } | null;
 }
-
-const INSTRUMENT_GROUPS: Record<string, string[]> = {
-  Cordas: ['Violino', 'Viola', 'Violoncelo'],
-  Madeiras: [
-    'Flauta', 'Oboé', "Oboé D'Amore", 'Corne Inglês',
-    'Clarinete', 'Clarinete Alto', 'Clarinete Baixo', 'Fagote',
-    'Saxofone Soprano', 'Saxofone Alto', 'Saxofone Tenor', 'Saxofone Baritono'
-  ],
-  Metais: [
-    'Trompete / Cornet', 'Flugelhom', 'Trompa',
-    'Trombone / Trombonito', 'Baritono', 'Eufônio', 'Tuba', 'Acordeon'
-  ],
-  Outros: ['Não Incluído no MOD']
-};
-
-const normalize = (s: string) =>
-  s
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
-    .replace(/\s+/g, ' ')
-    .trim();
-
-const findInstrumentGroup = (instrument: string): string => {
-  const normInstrument = normalize(instrument);
-  for (const [group, instruments] of Object.entries(INSTRUMENT_GROUPS)) {
-    const matchedInstrument = instruments.find((i) => {
-      const normI = normalize(i);
-      return (
-        normInstrument === normI ||
-        normInstrument.startsWith(normI + ' ') ||
-        normI.startsWith(normInstrument + ' ')
-      );
-    });
-    if (matchedInstrument) return group;
-  }
-  return 'Outros';
-};
 
 export const generateEventCSV = (eventData: EventData, attendances: AttendanceData[]) => {
   const tipoContagem = eventData.tipo_contagem || 'instrumento';
