@@ -6,7 +6,6 @@ export const INSTRUMENT_GROUPS: Record<string, string[]> = {
   Madeiras: [
     'Flauta',
     'Oboé',
-    "Oboé D'Amore",
     'Corne Inglês',
     'Clarinete',
     'Clarinete Alto',
@@ -15,7 +14,7 @@ export const INSTRUMENT_GROUPS: Record<string, string[]> = {
     'Saxofone Soprano',
     'Saxofone Alto',
     'Saxofone Tenor',
-    'Saxofone Baritono'
+    'Saxofone Barítono'
   ],
   Metais: [
     'Acordeon',
@@ -43,6 +42,47 @@ export const normalizeInstrument = (s: string): string =>
     .toUpperCase()
     .replace(/\s+/g, ' ')
     .trim();
+
+// Mapeamento de instrumentos do PDF para nomes padronizados
+export const INSTRUMENT_MAPPING: Record<string, string> = {
+  'VIOLINO': 'Violino',
+  'VIOLINO CONTRALTO': 'Violino Contralto',
+  'VIOLA': 'Viola',
+  'VIOLONCELO': 'Violoncelo',
+  'FLAUTA': 'Flauta',
+  'OBOÉ': 'Oboé',
+  'OBOE': 'Oboé',
+  'CORNE INGLÊS': 'Corne Inglês',
+  'CLARINETE': 'Clarinete',
+  'CLARINETE ALTO': 'Clarinete Alto',
+  'CLARINETE BAIXO': 'Clarinete Baixo',
+  'FAGOTE': 'Fagote',
+  'SAXOFONE SOPRANO RET': 'Saxofone Soprano',
+  'SAXOFONE SOPRANO': 'Saxofone Soprano',
+  'SAXOFONE ALTO': 'Saxofone Alto',
+  'SAXOFONE TENOR': 'Saxofone Tenor',
+  'SAXOFONE BARÍTONO': 'Saxofone Barítono',
+  'SAXOFONE BARITONO': 'Saxofone Barítono',
+  'ACORDEON': 'Acordeon',
+  'CORNET': 'Cornet',
+  'TROMPETE': 'Trompete',
+  'FLUGELHORN': 'Flugelhorn',
+  'TROMPA': 'Trompa',
+  'TROMBONITO': 'Trombonito',
+  'BARÍTONO DE PISTO': 'Barítono de Pisto',
+  'BARITONO DE PISTO': 'Barítono de Pisto',
+  'TROMBONE': 'Trombone',
+  'EUPHONIUM': 'Euphonium',
+  'TUBA': 'Tuba',
+  'ÓRGÃO': 'Órgão',
+  'ORGAO': 'Órgão'
+};
+
+// Função para mapear instrumento do PDF para nome padronizado
+export const mapInstrument = (pdfInstrument: string): string => {
+  const normalized = pdfInstrument.toUpperCase().trim();
+  return INSTRUMENT_MAPPING[normalized] || pdfInstrument;
+};
 
 // Função para encontrar o grupo de um instrumento
 export const findInstrumentGroup = (instrument: string): string => {
