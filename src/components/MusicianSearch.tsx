@@ -32,17 +32,15 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
       setLoading(true);
       const { data, error } = await supabase
         .from('musicians')
-        .select('*');
+        .select('*')
+        .ilike('name', `%${searchTerm}%`)
+        .limit(10);
 
       if (error) {
         console.error(error);
         setMusicians([]);
       } else {
-        const normalizedSearch = normalizeText(searchTerm);
-        const filtered = (data || []).filter((musician) =>
-          normalizeText(musician.name).includes(normalizedSearch)
-        );
-        setMusicians(filtered.slice(0, 10));
+        setMusicians(data || []);
       }
       setLoading(false);
     };
