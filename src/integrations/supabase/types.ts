@@ -184,7 +184,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      immutable_unaccent: { Args: { "": string }; Returns: string }
+      search_musicians_by_name: {
+        Args: { search_term: string }
+        Returns: {
+          cargo_ministerio: string | null
+          created_at: string | null
+          id: string
+          instrument: string
+          localidade: string | null
+          name: string
+          nivel: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "musicians"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
