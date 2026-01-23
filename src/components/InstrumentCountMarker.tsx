@@ -11,28 +11,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { INSTRUMENT_GROUPS, ALL_INSTRUMENTS } from "@/constants/instruments";
 
 interface InstrumentCountMarkerProps {
   currentSessionId: string;
   attendances: any[];
   tipoContagem: string;
 }
-
-const INSTRUMENT_GROUPS = {
-  Cordas: ['Violino', 'Viola', 'Violoncelo'],
-  Madeiras: [
-    'Flauta', 'Oboé', "Oboé D'Amore", 'Corne Inglês',
-    'Clarinete', 'Clarinete Alto', 'Clarinete Baixo', 'Fagote',
-    'Saxofone Soprano', 'Saxofone Alto', 'Saxofone Tenor', 'Saxofone Baritono'
-  ],
-  Metais: [
-    'Trompete / Cornet', 'Flugelhom', 'Trompa',
-    'Trombone / Trombonito', 'Baritono', 'Eufônio', 'Tuba', 'Acordeon'
-  ],
-  Outros: ['Não Incluído no MOD']
-};
-
-const ALL_INSTRUMENTS = Object.values(INSTRUMENT_GROUPS).flat();
 
 export const InstrumentCountMarker = ({ 
   currentSessionId, 
