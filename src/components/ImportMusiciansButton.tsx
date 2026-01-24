@@ -57,7 +57,7 @@ export const ImportMusiciansButton = () => {
     <div className="p-4 border rounded-lg bg-card">
       <h3 className="font-semibold mb-2">Importação de Músicos</h3>
       <p className="text-sm text-muted-foreground mb-4">
-        Total no JSON: {musiciansData.musicians.length} músicos
+        Total de Músicos: {musiciansData.musicians.length} músicos
       </p>
       
       <Button 
