@@ -100,16 +100,16 @@ export const LocalityComparisonChart = ({
           Ver Gráfico Detalhado
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] p-3 sm:p-6 overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="px-4 pt-4 pb-2 shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
             Análise por Localidade
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="h-[calc(90vh-80px)]">
-          <div className="space-y-3 sm:space-y-4 pr-2">
+        <ScrollArea className="flex-1 px-4 pb-4">
+          <div className="space-y-4">
             {/* Filters */}
             <LocalityFilters
               selectedCargo={selectedCargo}
@@ -119,86 +119,90 @@ export const LocalityComparisonChart = ({
               localidades={localidades}
             />
 
-            {/* Summary Cards - 2 rows on mobile */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-              <Card className="overflow-hidden">
-                <CardContent className="p-3 sm:p-4 text-center">
-                  <div className="text-xl sm:text-2xl font-bold leading-tight">{totalFiltered}</div>
-                  <div className="text-xs text-muted-foreground leading-tight mt-1">Total</div>
+            {/* Summary Cards - Stacked on mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <div className="text-2xl font-bold">{totalFiltered}</div>
+                  <div className="text-xs text-muted-foreground">Total</div>
                 </CardContent>
               </Card>
-              <Card className="overflow-hidden">
-                <CardContent className="p-3 sm:p-4 text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-primary leading-tight">{presentFiltered}</div>
-                  <div className="text-xs text-muted-foreground leading-tight mt-1">Presentes</div>
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <div className="text-2xl font-bold text-primary">{presentFiltered}</div>
+                  <div className="text-xs text-muted-foreground">Presentes</div>
                 </CardContent>
               </Card>
-              <Card className="overflow-hidden col-span-2 sm:col-span-1">
-                <CardContent className="p-3 sm:p-4 text-center">
-                  <div className="text-xl sm:text-2xl font-bold leading-tight">{overallPercentage}%</div>
-                  <div className="text-xs text-muted-foreground leading-tight mt-1">Taxa de Presença</div>
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <div className="text-2xl font-bold">{overallPercentage}%</div>
+                  <div className="text-xs text-muted-foreground">Taxa de Presença</div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Chart */}
             <Card>
-              <CardHeader className="p-3 sm:p-4 pb-2">
+              <CardHeader className="p-3 pb-2">
                 <CardTitle className="text-sm">
                   Comparativo por Presença (Top {isMobile ? 10 : 15})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-2 sm:p-4">
+              <CardContent className="p-2">
                 {chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={isMobile ? 320 : 400}>
-                    <BarChart
-                      data={chartData}
-                      layout="vertical"
-                      margin={{ top: 5, right: 40, left: 10, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={true} vertical={false} />
-                      <XAxis 
-                        type="number" 
-                        tick={{ fontSize: 11 }}
-                        tickCount={5}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        type="category"
-                        dataKey="displayName"
-                        width={isMobile ? 80 : 120}
-                        tick={{ fontSize: isMobile ? 10 : 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--background))",
-                          borderColor: "hsl(var(--border))",
-                          borderRadius: "8px",
-                          fontSize: "12px",
-                        }}
-                        formatter={(value: number, name: string) => [
-                          value,
-                          name === "total" ? "Total" : "Presentes",
-                        ]}
-                        labelFormatter={(label) => {
-                          const item = chartData.find((d) => d.displayName === label);
-                          return item?.localidade || label;
-                        }}
-                      />
-                      <Legend 
-                        wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
-                        iconSize={12}
-                      />
-                      <Bar dataKey="total" name="Total" fill="hsl(var(--muted-foreground))" opacity={0.3} radius={[0, 4, 4, 0]} />
-                      <Bar dataKey="present" name="Presentes" radius={[0, 4, 4, 0]}>
-                        {chartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={getBarColor(entry.percentage)} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <div className="w-full overflow-x-auto">
+                    <div style={{ minWidth: isMobile ? "300px" : "100%", height: isMobile ? 350 : 400 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={chartData}
+                          layout="vertical"
+                          margin={{ top: 5, right: 30, left: isMobile ? 100 : 130, bottom: 20 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={true} vertical={false} />
+                          <XAxis 
+                            type="number" 
+                            tick={{ fontSize: 10 }}
+                            tickCount={5}
+                            axisLine={false}
+                          />
+                          <YAxis
+                            type="category"
+                            dataKey="displayName"
+                            width={isMobile ? 90 : 120}
+                            tick={{ fontSize: isMobile ? 9 : 11 }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "hsl(var(--background))",
+                              borderColor: "hsl(var(--border))",
+                              borderRadius: "8px",
+                              fontSize: "12px",
+                            }}
+                            formatter={(value: number, name: string) => [
+                              value,
+                              name === "total" ? "Total" : "Presentes",
+                            ]}
+                            labelFormatter={(label) => {
+                              const item = chartData.find((d) => d.displayName === label);
+                              return item?.localidade || label;
+                            }}
+                          />
+                          <Legend 
+                            wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
+                            iconSize={10}
+                          />
+                          <Bar dataKey="total" name="Total" fill="hsl(var(--muted-foreground))" opacity={0.3} radius={[0, 4, 4, 0]} />
+                          <Bar dataKey="present" name="Presentes" radius={[0, 4, 4, 0]}>
+                            {chartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={getBarColor(entry.percentage)} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 ) : (
                   <p className="text-center text-muted-foreground py-8 text-sm">
                     Nenhum dado disponível
@@ -209,13 +213,13 @@ export const LocalityComparisonChart = ({
 
             {/* Detailed List */}
             <Card>
-              <CardHeader className="p-2 sm:pb-2 sm:p-4">
-                <CardTitle className="text-xs sm:text-sm">
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="text-sm">
                   Lista Completa ({filteredData.length} localidades)
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-2 sm:p-4">
-                <div className="space-y-2 max-h-[150px] sm:max-h-[200px] overflow-y-auto">
+              <CardContent className="p-3">
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
                   {filteredData.map((item) => (
                     <div
                       key={item.localidade}
@@ -224,17 +228,17 @@ export const LocalityComparisonChart = ({
                       <span className="text-xs sm:text-sm font-medium truncate flex-1 min-w-0">
                         {item.localidade}
                       </span>
-                      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                        <div className="w-12 sm:w-24 bg-muted rounded-full h-1.5 sm:h-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="w-16 sm:w-24 bg-muted rounded-full h-2">
                           <div
-                            className="h-1.5 sm:h-2 rounded-full transition-all"
+                            className="h-2 rounded-full transition-all"
                             style={{
                               width: `${item.percentage}%`,
                               backgroundColor: getBarColor(item.percentage),
                             }}
                           />
                         </div>
-                        <span className="text-[10px] sm:text-sm text-muted-foreground w-16 sm:w-20 text-right">
+                        <span className="text-xs text-muted-foreground w-14 sm:w-20 text-right">
                           {item.present}/{item.total}
                         </span>
                       </div>
