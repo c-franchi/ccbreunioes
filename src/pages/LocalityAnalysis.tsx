@@ -1,19 +1,45 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
-import { ArrowLeft, TrendingUp, ArrowUpDown } from "lucide-react";
+import { ArrowLeft, TrendingUp, ArrowUpDown, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LocalityFilters, filterByCargo } from "@/components/LocalityFilters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Toggle } from "@/components/ui/toggle";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Progress } from "@/components/ui/progress";
 
 interface LocalityData {
   localidade: string;
   total: number;
   present: number;
   percentage: number;
+  region: string;
 }
+
+// Helper to extract region from locality name
+const extractRegion = (localidade: string): string => {
+  const normalized = localidade.toUpperCase().trim();
+  
+  // Known region patterns
+  if (normalized.includes("IBATÉ") || normalized.includes("IBATE")) return "Ibaté";
+  if (normalized.includes("AMÉRICO") || normalized.includes("AMERICO")) return "Américo Brasiliense";
+  if (normalized.includes("SANTA LÚCIA") || normalized.includes("SANTA LUCIA")) return "Santa Lúcia";
+  if (normalized.includes("MATÃO") || normalized.includes("MATAO")) return "Matão";
+  if (normalized.includes("RINCÃO") || normalized.includes("RINCAO")) return "Rincão";
+  if (normalized.includes("GAVIÃO") || normalized.includes("GAVIAO")) return "Gavião Peixoto";
+  if (normalized.includes("MOTUCA")) return "Motuca";
+  if (normalized.includes("SANTA EUDÓXIA") || normalized.includes("SANTA EUDOXIA")) return "Santa Eudóxia";
+  if (normalized.includes("TRABIJU")) return "Trabiju";
+  if (normalized.includes("RIBEIRÃO") || normalized.includes("RIBEIRAO")) return "Ribeirão Bonito";
+  if (normalized.includes("BOA ESPERANÇA") || normalized.includes("BOA ESPERANCA")) return "Boa Esperança do Sul";
+  if (normalized.includes("DOURADO")) return "Dourado";
+  if (normalized.includes("ARARAQUARA")) return "Araraquara";
+  
+  // Default: use first part of locality name or assume Araraquara
+  return "Araraquara";
+};
 
 const LocalityAnalysis = () => {
   const location = useLocation();
@@ -57,6 +83,7 @@ const LocalityAnalysis = () => {
         total: stats.total,
         present: stats.present,
         percentage: stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0,
+        region: extractRegion(localidade),
       }))
       .sort((a, b) => a.localidade.localeCompare(b.localidade, 'pt-BR'));
   };
@@ -245,44 +272,111 @@ const LocalityAnalysis = () => {
           </CardContent>
         </Card>
 
-        {/* Detailed List */}
+        {/* Detailed List by Region */}
         <Card>
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-base">
-              Lista Completa ({filteredData.length} localidades)
+              Lista por Região ({filteredData.length} localidades)
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-2">
-            <div className="space-y-2">
-              {sortedData.map((item) => (
-                <div
-                  key={item.localidade}
-                  className="flex items-center justify-between py-2 border-b border-border/50 last:border-0 gap-3"
-                >
-                  <span className="text-sm font-medium truncate flex-1 min-w-0">
-                    {item.localidade}
-                  </span>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="w-20 sm:w-32 bg-muted rounded-full h-2.5">
-                      <div
-                        className="h-2.5 rounded-full transition-all"
-                        style={{
-                          width: `${item.percentage}%`,
-                          backgroundColor: getBarColor(item.percentage),
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm text-muted-foreground w-20 text-right">
-                      {item.present}/{item.total} ({item.percentage}%)
+            <RegionAccordion data={sortedData} getBarColor={getBarColor} />
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  );
+};
+
+// Component to display localities grouped by region in accordions
+interface RegionAccordionProps {
+  data: LocalityData[];
+  getBarColor: (percentage: number) => string;
+}
+
+const RegionAccordion = ({ data, getBarColor }: RegionAccordionProps) => {
+  // Group data by region
+  const groupedByRegion = useMemo(() => {
+    const groups: Record<string, LocalityData[]> = {};
+    
+    data.forEach((item) => {
+      if (!groups[item.region]) {
+        groups[item.region] = [];
+      }
+      groups[item.region].push(item);
+    });
+    
+    // Sort regions alphabetically and calculate totals
+    return Object.entries(groups)
+      .map(([region, localities]) => {
+        const total = localities.reduce((sum, l) => sum + l.total, 0);
+        const present = localities.reduce((sum, l) => sum + l.present, 0);
+        const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+        
+        return {
+          region,
+          localities,
+          total,
+          present,
+          percentage,
+        };
+      })
+      .sort((a, b) => a.region.localeCompare(b.region, 'pt-BR'));
+  }, [data]);
+
+  if (groupedByRegion.length === 0) {
+    return <p className="text-center text-muted-foreground py-4">Nenhuma localidade encontrada</p>;
+  }
+
+  return (
+    <Accordion type="multiple" className="w-full" defaultValue={groupedByRegion.map(g => g.region)}>
+      {groupedByRegion.map((group) => (
+        <AccordionItem key={group.region} value={group.region} className="border-b border-border/50">
+          <AccordionTrigger className="py-3 hover:no-underline">
+            <div className="flex items-center justify-between w-full pr-2">
+              <span className="font-semibold text-sm">{group.region}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {group.present}/{group.total}
+                </span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                  {group.percentage}%
+                </span>
+              </div>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pb-3">
+            <div className="space-y-3 pl-1">
+              {group.localities.map((item) => (
+                <div key={item.localidade} className="space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-sm font-medium leading-tight">
+                      {item.localidade}
+                    </span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {item.present}/{item.total}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Progress 
+                      value={item.percentage} 
+                      className="h-2 flex-1"
+                      style={{
+                        // @ts-ignore - custom CSS property for progress bar color
+                        '--progress-color': getBarColor(item.percentage),
+                      } as React.CSSProperties}
+                    />
+                    <span className="text-xs font-medium w-10 text-right" style={{ color: getBarColor(item.percentage) }}>
+                      {item.percentage}%
                     </span>
                   </div>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
   );
 };
 
