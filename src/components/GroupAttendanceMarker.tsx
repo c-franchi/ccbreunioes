@@ -39,7 +39,8 @@ export const GroupAttendanceMarker = ({
       .from('musicians')
       .select('*')
       .order('instrument')
-      .order('name');
+      .order('name')
+      .range(0, 2000);
 
     if (error) {
       console.error(error);

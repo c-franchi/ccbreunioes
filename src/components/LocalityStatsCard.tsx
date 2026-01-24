@@ -39,7 +39,8 @@ export const LocalityStatsCard = ({ currentSessionId, attendances }: LocalitySta
       setLoading(true);
       const { data, error } = await supabase
         .from("musicians")
-        .select("id, name, localidade, cargo_ministerio, instrument");
+        .select("id, name, localidade, cargo_ministerio, instrument")
+        .range(0, 2000);
 
       if (error) {
         console.error("Error loading musicians:", error);
