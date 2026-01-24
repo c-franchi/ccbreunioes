@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Plus, CheckCircle2, Mic, MicOff } from "lucide-react";
+import { Search, Plus, CheckCircle2, Mic, MicOff, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -99,6 +99,32 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
     return attendances.some(att => att.musician_id === musicianId);
   };
 
+  const getAttendanceId = (musicianId: string) => {
+    const attendance = attendances.find(att => att.musician_id === musicianId);
+    return attendance?.id;
+  };
+
+  const handleRemoveAttendance = async (musician: any) => {
+    const attendanceId = getAttendanceId(musician.id);
+    if (!attendanceId) return;
+
+    const { error } = await supabase
+      .from('attendances')
+      .delete()
+      .eq('id', attendanceId);
+
+    if (error) {
+      toast.error("Erro ao remover presença");
+      console.error(error);
+    } else {
+      toast.success(`Presença removida: ${musician.name}`);
+    }
+  };
+
+  // Separate musicians into already present and not present
+  const presentMusicians = musicians.filter(m => isAlreadyPresent(m.id));
+  const notPresentMusicians = musicians.filter(m => !isAlreadyPresent(m.id));
+
   const handleCheckIn = async (musician: any) => {
     if (!currentSessionId) {
       toast.error("Sessão não iniciada");
@@ -160,10 +186,55 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
             </Button>
           </div>
 
-          {/* Search Results */}
-          {musicians.filter(m => !isAlreadyPresent(m.id)).length > 0 && (
+          {/* Already Present Musicians */}
+          {presentMusicians.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Já presente na lista:</p>
+              {presentMusicians.map((musician) => (
+                <Card 
+                  key={musician.id}
+                  className="border-primary/50 bg-primary/5"
+                >
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                          <h3 className="font-semibold text-sm sm:text-base break-words">{musician.name}</h3>
+                        </div>
+                        <div className="flex gap-1.5 sm:gap-2 flex-wrap ml-6">
+                          <Badge variant="secondary" className="text-xs">{musician.instrument}</Badge>
+                          {musician.cargo_ministerio && (
+                            <Badge variant="outline" className="text-xs">{musician.cargo_ministerio}</Badge>
+                          )}
+                        </div>
+                        {musician.localidade && (
+                          <p className="text-xs sm:text-sm text-muted-foreground break-words ml-6">{musician.localidade}</p>
+                        )}
+                      </div>
+                      <Button
+                        onClick={() => handleRemoveAttendance(musician)}
+                        size="sm"
+                        variant="destructive"
+                        className="flex-shrink-0 w-full sm:w-auto text-xs sm:text-sm"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Remover
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Search Results - Not Present */}
+          {notPresentMusicians.length > 0 && (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {musicians.filter(m => !isAlreadyPresent(m.id)).map((musician) => (
+              {presentMusicians.length > 0 && (
+                <p className="text-sm font-medium text-muted-foreground">Adicionar presença:</p>
+              )}
+              {notPresentMusicians.map((musician) => (
                 <Card 
                   key={musician.id}
                   className="hover:bg-accent/50 transition-colors"
@@ -189,11 +260,9 @@ export const MusicianSearch = ({ currentSessionId, attendances }: MusicianSearch
                         onClick={() => handleCheckIn(musician)}
                         size="sm"
                         className="flex-shrink-0 w-full sm:w-auto text-xs sm:text-sm"
-                        variant={isAlreadyPresent(musician.id) ? "secondary" : "default"}
-                        disabled={isAlreadyPresent(musician.id)}
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {isAlreadyPresent(musician.id) ? "Já Presente" : "Confirmar"}
+                        Confirmar
                       </Button>
                     </div>
                   </CardContent>
