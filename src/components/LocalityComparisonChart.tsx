@@ -98,7 +98,7 @@ export const LocalityComparisonChart = ({
           Ver Gráfico Detalhado
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] p-3 sm:p-6 overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] p-3 sm:p-6 overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -146,17 +146,18 @@ export const LocalityComparisonChart = ({
                   Comparativo (Top {isMobile ? 8 : 15})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-1 sm:p-4">
+              <CardContent className="p-1 sm:p-4 overflow-x-auto">
                 {chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={isMobile ? 250 : 350}>
-                    <BarChart
-                      data={chartData}
-                      layout="vertical"
-                      margin={isMobile 
-                        ? { top: 5, right: 5, left: 0, bottom: 5 }
-                        : { top: 5, right: 30, left: 100, bottom: 5 }
-                      }
-                    >
+                  <div style={{ minWidth: isMobile ? '100%' : 'auto', width: '100%' }}>
+                    <ResponsiveContainer width="100%" height={isMobile ? 280 : 350}>
+                      <BarChart
+                        data={chartData}
+                        layout="vertical"
+                        margin={isMobile 
+                          ? { top: 5, right: 25, left: 5, bottom: 5 }
+                          : { top: 5, right: 30, left: 100, bottom: 5 }
+                        }
+                      >
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis 
                         type="number" 
@@ -195,8 +196,9 @@ export const LocalityComparisonChart = ({
                           <Cell key={`cell-${index}`} fill={getBarColor(entry.percentage)} />
                         ))}
                       </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 ) : (
                   <p className="text-center text-muted-foreground py-8 text-sm">
                     Nenhum dado disponível

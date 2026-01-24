@@ -37,16 +37,33 @@ export const LocalityStatsCard = ({ currentSessionId, attendances }: LocalitySta
   useEffect(() => {
     const loadMusicians = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("musicians")
-        .select("id, name, localidade, cargo_ministerio, instrument")
-        .range(0, 2000);
-
-      if (error) {
-        console.error("Error loading musicians:", error);
-      } else {
-        setAllMusicians(data || []);
+      // Fetch all musicians - using multiple requests to bypass 1000 limit
+      let allData: any[] = [];
+      let hasMore = true;
+      let offset = 0;
+      const pageSize = 1000;
+      
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from("musicians")
+          .select("id, name, localidade, cargo_ministerio, instrument")
+          .range(offset, offset + pageSize - 1);
+        
+        if (error) {
+          console.error("Error loading musicians:", error);
+          break;
+        }
+        
+        if (data && data.length > 0) {
+          allData = [...allData, ...data];
+          offset += pageSize;
+          hasMore = data.length === pageSize;
+        } else {
+          hasMore = false;
+        }
       }
+
+      setAllMusicians(allData);
       setLoading(false);
     };
 
