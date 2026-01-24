@@ -102,7 +102,7 @@ export const LocalityStatsCard = ({ currentSessionId, attendances }: LocalitySta
         percentage: stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0,
       }))
       .filter((item) => item.present > 0) // Only show localities with attendances
-      .sort((a, b) => b.present - a.present);
+      .sort((a, b) => a.localidade.localeCompare(b.localidade, 'pt-BR')); // Alphabetical order
   };
 
   const localityStats = calculateLocalityStats();
@@ -133,7 +133,7 @@ export const LocalityStatsCard = ({ currentSessionId, attendances }: LocalitySta
         present: stats.present,
         percentage: stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0,
       }))
-      .sort((a, b) => b.present - a.present);
+      .sort((a, b) => a.localidade.localeCompare(b.localidade, 'pt-BR')); // Alphabetical order
   }
 
   // Color based on percentage

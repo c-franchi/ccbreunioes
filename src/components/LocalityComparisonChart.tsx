@@ -61,11 +61,13 @@ export const LocalityComparisonChart = ({
         present: stats.present,
         percentage: stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0,
       }))
-      .sort((a, b) => b.present - a.present);
+      .sort((a, b) => a.localidade.localeCompare(b.localidade, 'pt-BR')); // Alphabetical order
   };
 
   const filteredData = getFilteredData();
-  const topData = filteredData.slice(0, isMobile ? 8 : 15); // Show fewer on mobile
+  // Sort by present count for chart (descending), but keep alphabetical for list
+  const chartSortedData = [...filteredData].sort((a, b) => b.present - a.present);
+  const topData = chartSortedData.slice(0, isMobile ? 10 : 15);
 
   const totalFiltered = filteredData.reduce((sum, d) => sum + d.total, 0);
   const presentFiltered = filteredData.reduce((sum, d) => sum + d.present, 0);
@@ -78,16 +80,16 @@ export const LocalityComparisonChart = ({
     return "hsl(var(--chart-3))";
   };
 
-  // Truncate locality name for mobile
+  // Truncate locality name for display
   const truncateName = (name: string, maxLength: number) => {
     if (name.length <= maxLength) return name;
     return name.substring(0, maxLength - 1) + "…";
   };
 
-  // Prepare chart data with truncated names for mobile
+  // Prepare chart data with truncated names
   const chartData = topData.map((item) => ({
     ...item,
-    displayName: isMobile ? truncateName(item.localidade, 10) : item.localidade,
+    displayName: truncateName(item.localidade, isMobile ? 12 : 20),
   }));
 
   return (
@@ -117,65 +119,64 @@ export const LocalityComparisonChart = ({
               localidades={localidades}
             />
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
+            {/* Summary Cards - 2 rows on mobile */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               <Card className="overflow-hidden">
-                <CardContent className="p-2 sm:p-4 text-center">
-                  <div className="text-base sm:text-2xl font-bold leading-tight">{totalFiltered}</div>
-                  <div className="text-[9px] sm:text-xs text-muted-foreground leading-tight mt-0.5">Total</div>
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <div className="text-xl sm:text-2xl font-bold leading-tight">{totalFiltered}</div>
+                  <div className="text-xs text-muted-foreground leading-tight mt-1">Total</div>
                 </CardContent>
               </Card>
               <Card className="overflow-hidden">
-                <CardContent className="p-2 sm:p-4 text-center">
-                  <div className="text-base sm:text-2xl font-bold text-primary leading-tight">{presentFiltered}</div>
-                  <div className="text-[9px] sm:text-xs text-muted-foreground leading-tight mt-0.5">Presentes</div>
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-primary leading-tight">{presentFiltered}</div>
+                  <div className="text-xs text-muted-foreground leading-tight mt-1">Presentes</div>
                 </CardContent>
               </Card>
-              <Card className="overflow-hidden">
-                <CardContent className="p-2 sm:p-4 text-center">
-                  <div className="text-base sm:text-2xl font-bold leading-tight">{overallPercentage}%</div>
-                  <div className="text-[9px] sm:text-xs text-muted-foreground leading-tight mt-0.5">Taxa</div>
+              <Card className="overflow-hidden col-span-2 sm:col-span-1">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <div className="text-xl sm:text-2xl font-bold leading-tight">{overallPercentage}%</div>
+                  <div className="text-xs text-muted-foreground leading-tight mt-1">Taxa de Presença</div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Chart */}
             <Card>
-              <CardHeader className="p-2 sm:pb-2 sm:p-4">
-                <CardTitle className="text-xs sm:text-sm">
-                  Comparativo (Top {isMobile ? 8 : 15})
+              <CardHeader className="p-3 sm:p-4 pb-2">
+                <CardTitle className="text-sm">
+                  Comparativo por Presença (Top {isMobile ? 10 : 15})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-1 sm:p-4 overflow-x-auto">
+              <CardContent className="p-2 sm:p-4">
                 {chartData.length > 0 ? (
-                  <div style={{ minWidth: isMobile ? '100%' : 'auto', width: '100%' }}>
-                    <ResponsiveContainer width="100%" height={isMobile ? 280 : 350}>
-                      <BarChart
-                        data={chartData}
-                        layout="vertical"
-                        margin={isMobile 
-                          ? { top: 5, right: 25, left: 5, bottom: 5 }
-                          : { top: 5, right: 30, left: 100, bottom: 5 }
-                        }
-                      >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <ResponsiveContainer width="100%" height={isMobile ? 320 : 400}>
+                    <BarChart
+                      data={chartData}
+                      layout="vertical"
+                      margin={{ top: 5, right: 40, left: 10, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={true} vertical={false} />
                       <XAxis 
                         type="number" 
-                        tick={{ fontSize: isMobile ? 8 : 11 }}
-                        tickCount={4}
+                        tick={{ fontSize: 11 }}
+                        tickCount={5}
+                        axisLine={false}
                       />
                       <YAxis
                         type="category"
                         dataKey="displayName"
-                        width={isMobile ? 60 : 95}
-                        tick={{ fontSize: isMobile ? 8 : 11 }}
+                        width={isMobile ? 80 : 120}
+                        tick={{ fontSize: isMobile ? 10 : 12 }}
+                        axisLine={false}
+                        tickLine={false}
                       />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "hsl(var(--background))",
                           borderColor: "hsl(var(--border))",
                           borderRadius: "8px",
-                          fontSize: isMobile ? "11px" : "12px",
+                          fontSize: "12px",
                         }}
                         formatter={(value: number, name: string) => [
                           value,
@@ -187,18 +188,17 @@ export const LocalityComparisonChart = ({
                         }}
                       />
                       <Legend 
-                        wrapperStyle={{ fontSize: isMobile ? "10px" : "12px" }}
-                        iconSize={isMobile ? 8 : 14}
+                        wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                        iconSize={12}
                       />
-                      <Bar dataKey="total" name="Total" fill="hsl(var(--muted-foreground))" opacity={0.4} />
-                      <Bar dataKey="present" name="Presentes">
+                      <Bar dataKey="total" name="Total" fill="hsl(var(--muted-foreground))" opacity={0.3} radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="present" name="Presentes" radius={[0, 4, 4, 0]}>
                         {chartData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={getBarColor(entry.percentage)} />
                         ))}
                       </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                    </BarChart>
+                  </ResponsiveContainer>
                 ) : (
                   <p className="text-center text-muted-foreground py-8 text-sm">
                     Nenhum dado disponível
