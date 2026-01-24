@@ -167,12 +167,12 @@ export const EditMusicianDialog = ({
 
           <div className="space-y-2">
             <Label htmlFor="edit-cargo">Cargo no Ministério</Label>
-            <Select value={cargo} onValueChange={setCargo}>
+            <Select value={cargo || "none"} onValueChange={(val) => setCargo(val === "none" ? "" : val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o cargo (opcional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
                 {CARGOS.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
@@ -184,12 +184,12 @@ export const EditMusicianDialog = ({
 
           <div className="space-y-2">
             <Label htmlFor="edit-nivel">Nível</Label>
-            <Select value={nivel} onValueChange={setNivel}>
+            <Select value={nivel || "none"} onValueChange={(val) => setNivel(val === "none" ? "" : val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o nível (opcional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
                 {NIVEIS.map((n) => (
                   <SelectItem key={n} value={n}>
                     {n}
