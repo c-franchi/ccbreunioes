@@ -7,6 +7,7 @@ import { AttendanceList } from "@/components/AttendanceList";
 import { EventManager } from "@/components/EventManager";
 import { GroupAttendanceMarker } from "@/components/GroupAttendanceMarker";
 import { InstrumentCountMarker } from "@/components/InstrumentCountMarker";
+import { ImportMusiciansButton } from "@/components/ImportMusiciansButton";
 const Index = () => {
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [attendances, setAttendances] = useState<any[]>([]);
@@ -136,8 +137,9 @@ const Index = () => {
           </div>
 
           {/* Stats Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
             <AttendanceStats stats={stats} />
+            <ImportMusiciansButton />
           </div>
         </div>
       </main>
