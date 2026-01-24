@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin } from "lucide-react";
+import { MapPin, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { LocalityComparisonChart } from "./LocalityComparisonChart";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { filterByCargo } from "./LocalityFilters";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,6 +31,7 @@ const CARGO_OPTIONS = [
 ];
 
 export const LocalityStatsCard = ({ currentSessionId, attendances }: LocalityStatsCardProps) => {
+  const navigate = useNavigate();
   const [allMusicians, setAllMusicians] = useState<any[]>([]);
   const [selectedCargo, setSelectedCargo] = useState("todos");
   const [loading, setLoading] = useState(true);
@@ -236,11 +238,21 @@ export const LocalityStatsCard = ({ currentSessionId, attendances }: LocalitySta
         )}
 
         {/* Chart Button */}
-        <LocalityComparisonChart
-          data={allLocalityStats}
-          allMusicians={allMusicians}
-          presentMusicianIds={presentMusicianIds}
-        />
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={() => navigate("/analise-localidade", {
+            state: {
+              allMusicians,
+              presentMusicianIds: Array.from(presentMusicianIds),
+              currentSessionId
+            }
+          })}
+        >
+          <BarChart3 className="w-4 h-4 mr-2" />
+          Ver Gráfico Detalhado
+        </Button>
       </CardContent>
     </Card>
   );
