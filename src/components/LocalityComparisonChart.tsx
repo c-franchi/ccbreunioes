@@ -1,12 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
-import { BarChart3, TrendingUp } from "lucide-react";
+import { BarChart3, TrendingUp, ArrowUpDown } from "lucide-react";
 import { useState } from "react";
 import { LocalityFilters, filterByCargo } from "./LocalityFilters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Toggle } from "@/components/ui/toggle";
 
 interface LocalityData {
   localidade: string;
@@ -28,6 +29,7 @@ export const LocalityComparisonChart = ({
 }: LocalityComparisonChartProps) => {
   const [selectedCargo, setSelectedCargo] = useState("todos");
   const [selectedLocalidade, setSelectedLocalidade] = useState("todas");
+  const [sortByPresence, setSortByPresence] = useState(true);
   const isMobile = useIsMobile();
 
   const localidades = [...new Set(allMusicians.map((m) => m.localidade).filter(Boolean))].sort();
@@ -65,9 +67,16 @@ export const LocalityComparisonChart = ({
   };
 
   const filteredData = getFilteredData();
-  // Sort by present count for chart (descending), but keep alphabetical for list
-  const chartSortedData = [...filteredData].sort((a, b) => b.present - a.present);
-  const topData = chartSortedData.slice(0, isMobile ? 10 : 15);
+  
+  // Sort based on user preference
+  const sortedData = [...filteredData].sort((a, b) => {
+    if (sortByPresence) {
+      return b.present - a.present; // By presence count (descending)
+    }
+    return a.localidade.localeCompare(b.localidade, 'pt-BR'); // Alphabetical
+  });
+  
+  const topData = sortedData.slice(0, isMobile ? 10 : 15);
 
   const totalFiltered = filteredData.reduce((sum, d) => sum + d.total, 0);
   const presentFiltered = filteredData.reduce((sum, d) => sum + d.present, 0);
@@ -119,24 +128,26 @@ export const LocalityComparisonChart = ({
               localidades={localidades}
             />
 
-            {/* Summary Cards - Compact 3 columns */}
-            <div className="grid grid-cols-3 gap-2">
+            {/* Summary Cards - 2 columns first row, full width second */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <div className="text-xl font-bold">{totalFiltered}</div>
+                    <div className="text-xs text-muted-foreground">Total</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <div className="text-xl font-bold text-primary">{presentFiltered}</div>
+                    <div className="text-xs text-muted-foreground">Presentes</div>
+                  </CardContent>
+                </Card>
+              </div>
               <Card>
-                <CardContent className="p-2 text-center">
-                  <div className="text-lg font-bold">{totalFiltered}</div>
-                  <div className="text-[10px] text-muted-foreground">Total</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-2 text-center">
-                  <div className="text-lg font-bold text-primary">{presentFiltered}</div>
-                  <div className="text-[10px] text-muted-foreground">Presentes</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-2 text-center">
-                  <div className="text-lg font-bold">{overallPercentage}%</div>
-                  <div className="text-[10px] text-muted-foreground">Taxa</div>
+                <CardContent className="p-3 text-center">
+                  <div className="text-xl font-bold">{overallPercentage}%</div>
+                  <div className="text-xs text-muted-foreground">Taxa de Presença</div>
                 </CardContent>
               </Card>
             </div>
@@ -144,9 +155,21 @@ export const LocalityComparisonChart = ({
             {/* Chart */}
             <Card>
               <CardHeader className="p-3 pb-2">
-                <CardTitle className="text-sm">
-                  Comparativo por Presença (Top {isMobile ? 10 : 15})
-                </CardTitle>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-sm">
+                    Top {isMobile ? 10 : 15} - {sortByPresence ? "Por Presença" : "Alfabética"}
+                  </CardTitle>
+                  <Toggle
+                    size="sm"
+                    pressed={sortByPresence}
+                    onPressedChange={setSortByPresence}
+                    aria-label="Alternar ordenação"
+                    className="h-7 px-2"
+                  >
+                    <ArrowUpDown className="h-3 w-3 mr-1" />
+                    <span className="text-[10px]">{sortByPresence ? "Presença" : "A-Z"}</span>
+                  </Toggle>
+                </div>
               </CardHeader>
               <CardContent className="p-2">
                 {chartData.length > 0 ? (
@@ -218,7 +241,7 @@ export const LocalityComparisonChart = ({
               </CardHeader>
               <CardContent className="p-3">
                 <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                  {filteredData.map((item) => (
+                  {sortedData.map((item) => (
                     <div
                       key={item.localidade}
                       className="flex items-center justify-between py-1 border-b border-border/50 last:border-0 gap-2"
