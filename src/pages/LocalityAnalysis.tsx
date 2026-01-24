@@ -329,7 +329,7 @@ const RegionAccordion = ({ data, getBarColor }: RegionAccordionProps) => {
   }
 
   return (
-    <Accordion type="multiple" className="w-full" defaultValue={groupedByRegion.map(g => g.region)}>
+    <Accordion type="multiple" className="w-full">
       {groupedByRegion.map((group) => (
         <AccordionItem key={group.region} value={group.region} className="border-b border-border/50">
           <AccordionTrigger className="py-3 hover:no-underline">
