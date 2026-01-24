@@ -100,16 +100,16 @@ export const LocalityComparisonChart = ({
           Ver Gráfico Detalhado
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="px-4 pt-4 pb-2 shrink-0">
-          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+      <DialogContent className="max-w-[90vw] sm:max-w-lg md:max-w-2xl max-h-[85vh] p-4 overflow-hidden flex flex-col">
+        <DialogHeader className="shrink-0 pb-2">
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <TrendingUp className="w-4 h-4" />
             Análise por Localidade
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-4 pb-4">
-          <div className="space-y-4">
+        <ScrollArea className="flex-1">
+          <div className="space-y-3 pr-3">
             {/* Filters */}
             <LocalityFilters
               selectedCargo={selectedCargo}
@@ -120,22 +120,22 @@ export const LocalityComparisonChart = ({
             />
 
             {/* Summary Cards - Stacked on mobile */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2">
               <Card>
                 <CardContent className="p-3 text-center">
-                  <div className="text-2xl font-bold">{totalFiltered}</div>
+                  <div className="text-xl font-bold">{totalFiltered}</div>
                   <div className="text-xs text-muted-foreground">Total</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-3 text-center">
-                  <div className="text-2xl font-bold text-primary">{presentFiltered}</div>
+                  <div className="text-xl font-bold text-primary">{presentFiltered}</div>
                   <div className="text-xs text-muted-foreground">Presentes</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-3 text-center">
-                  <div className="text-2xl font-bold">{overallPercentage}%</div>
+                  <div className="text-xl font-bold">{overallPercentage}%</div>
                   <div className="text-xs text-muted-foreground">Taxa de Presença</div>
                 </CardContent>
               </Card>
@@ -150,58 +150,56 @@ export const LocalityComparisonChart = ({
               </CardHeader>
               <CardContent className="p-2">
                 {chartData.length > 0 ? (
-                  <div className="w-full overflow-x-auto">
-                    <div style={{ minWidth: isMobile ? "300px" : "100%", height: isMobile ? 350 : 400 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={chartData}
-                          layout="vertical"
-                          margin={{ top: 5, right: 30, left: isMobile ? 100 : 130, bottom: 20 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={true} vertical={false} />
-                          <XAxis 
-                            type="number" 
-                            tick={{ fontSize: 10 }}
-                            tickCount={5}
-                            axisLine={false}
-                          />
-                          <YAxis
-                            type="category"
-                            dataKey="displayName"
-                            width={isMobile ? 90 : 120}
-                            tick={{ fontSize: isMobile ? 9 : 11 }}
-                            axisLine={false}
-                            tickLine={false}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "hsl(var(--background))",
-                              borderColor: "hsl(var(--border))",
-                              borderRadius: "8px",
-                              fontSize: "12px",
-                            }}
-                            formatter={(value: number, name: string) => [
-                              value,
-                              name === "total" ? "Total" : "Presentes",
-                            ]}
-                            labelFormatter={(label) => {
-                              const item = chartData.find((d) => d.displayName === label);
-                              return item?.localidade || label;
-                            }}
-                          />
-                          <Legend 
-                            wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
-                            iconSize={10}
-                          />
-                          <Bar dataKey="total" name="Total" fill="hsl(var(--muted-foreground))" opacity={0.3} radius={[0, 4, 4, 0]} />
-                          <Bar dataKey="present" name="Presentes" radius={[0, 4, 4, 0]}>
-                            {chartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={getBarColor(entry.percentage)} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                  <div className="w-full" style={{ height: isMobile ? 300 : 400 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={chartData}
+                        layout="vertical"
+                        margin={{ top: 5, right: 20, left: 5, bottom: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={true} vertical={false} />
+                        <XAxis 
+                          type="number" 
+                          tick={{ fontSize: 10 }}
+                          tickCount={5}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="displayName"
+                          width={isMobile ? 80 : 110}
+                          tick={{ fontSize: isMobile ? 9 : 11 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--background))",
+                            borderColor: "hsl(var(--border))",
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                          }}
+                          formatter={(value: number, name: string) => [
+                            value,
+                            name === "total" ? "Total" : "Presentes",
+                          ]}
+                          labelFormatter={(label) => {
+                            const item = chartData.find((d) => d.displayName === label);
+                            return item?.localidade || label;
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
+                          iconSize={10}
+                        />
+                        <Bar dataKey="total" name="Total" fill="hsl(var(--muted-foreground))" opacity={0.3} radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="present" name="Presentes" radius={[0, 4, 4, 0]}>
+                          {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={getBarColor(entry.percentage)} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 ) : (
                   <p className="text-center text-muted-foreground py-8 text-sm">
