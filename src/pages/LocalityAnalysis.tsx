@@ -51,16 +51,29 @@ const LocalityAnalysis = () => {
 
   const [selectedCargo, setSelectedCargo] = useState("todos");
   const [selectedLocalidade, setSelectedLocalidade] = useState("todas");
+  const [selectedCidade, setSelectedCidade] = useState("todas");
   const [sortByPresence, setSortByPresence] = useState(true);
 
   const localidades = [...new Set(allMusicians.map((m: any) => m.localidade).filter(Boolean))].sort() as string[];
+  
+  // Extract unique cities/regions from musicians
+  const cidades = useMemo(() => {
+    const cidadeSet = new Set<string>();
+    allMusicians.forEach((m: any) => {
+      if (m.localidade) {
+        cidadeSet.add(extractRegion(m.localidade));
+      }
+    });
+    return [...cidadeSet].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }, [allMusicians]);
 
   // Filter data based on selections
   const getFilteredData = (): LocalityData[] => {
     const filteredMusicians = allMusicians.filter((m: any) => {
       const matchesCargo = filterByCargo(selectedCargo, m.cargo_ministerio);
       const matchesLocalidade = selectedLocalidade === "todas" || m.localidade === selectedLocalidade;
-      return matchesCargo && matchesLocalidade;
+      const matchesCidade = selectedCidade === "todas" || extractRegion(m.localidade || "") === selectedCidade;
+      return matchesCargo && matchesLocalidade && matchesCidade;
     });
 
     // Group by localidade
@@ -169,6 +182,9 @@ const LocalityAnalysis = () => {
           selectedLocalidade={selectedLocalidade}
           onLocalidadeChange={setSelectedLocalidade}
           localidades={localidades}
+          selectedCidade={selectedCidade}
+          onCidadeChange={setSelectedCidade}
+          cidades={cidades}
         />
 
         {/* Summary Cards */}

@@ -6,6 +6,9 @@ interface LocalityFiltersProps {
   selectedLocalidade: string;
   onLocalidadeChange: (value: string) => void;
   localidades: string[];
+  selectedCidade?: string;
+  onCidadeChange?: (value: string) => void;
+  cidades?: string[];
 }
 
 const CARGO_OPTIONS = [
@@ -24,9 +27,12 @@ export const LocalityFilters = ({
   selectedLocalidade,
   onLocalidadeChange,
   localidades,
+  selectedCidade,
+  onCidadeChange,
+  cidades,
 }: LocalityFiltersProps) => {
   return (
-    <div className="flex flex-col sm:flex-row gap-2">
+    <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
       <Select value={selectedCargo} onValueChange={onCargoChange}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Filtrar por cargo" />
@@ -39,6 +45,22 @@ export const LocalityFilters = ({
           ))}
         </SelectContent>
       </Select>
+
+      {cidades && onCidadeChange && (
+        <Select value={selectedCidade} onValueChange={onCidadeChange}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Filtrar por cidade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Todas as Cidades</SelectItem>
+            {cidades.map((cidade) => (
+              <SelectItem key={cidade} value={cidade}>
+                {cidade}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
 
       <Select value={selectedLocalidade} onValueChange={onLocalidadeChange}>
         <SelectTrigger className="w-full sm:w-[200px]">
