@@ -81,13 +81,13 @@ export const LocalityComparisonChart = ({
   // Truncate locality name for mobile
   const truncateName = (name: string, maxLength: number) => {
     if (name.length <= maxLength) return name;
-    return name.substring(0, maxLength) + "...";
+    return name.substring(0, maxLength - 1) + "…";
   };
 
   // Prepare chart data with truncated names for mobile
   const chartData = topData.map((item) => ({
     ...item,
-    displayName: isMobile ? truncateName(item.localidade, 12) : item.localidade,
+    displayName: isMobile ? truncateName(item.localidade, 10) : item.localidade,
   }));
 
   return (
@@ -118,23 +118,23 @@ export const LocalityComparisonChart = ({
             />
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <Card>
-                <CardContent className="p-2 sm:pt-4 sm:p-4">
-                  <div className="text-lg sm:text-2xl font-bold">{totalFiltered}</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground">Total</div>
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
+              <Card className="overflow-hidden">
+                <CardContent className="p-2 sm:p-4 text-center">
+                  <div className="text-base sm:text-2xl font-bold leading-tight">{totalFiltered}</div>
+                  <div className="text-[9px] sm:text-xs text-muted-foreground leading-tight mt-0.5">Total</div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardContent className="p-2 sm:pt-4 sm:p-4">
-                  <div className="text-lg sm:text-2xl font-bold text-primary">{presentFiltered}</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground">Presentes</div>
+              <Card className="overflow-hidden">
+                <CardContent className="p-2 sm:p-4 text-center">
+                  <div className="text-base sm:text-2xl font-bold text-primary leading-tight">{presentFiltered}</div>
+                  <div className="text-[9px] sm:text-xs text-muted-foreground leading-tight mt-0.5">Presentes</div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardContent className="p-2 sm:pt-4 sm:p-4">
-                  <div className="text-lg sm:text-2xl font-bold">{overallPercentage}%</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground">Taxa</div>
+              <Card className="overflow-hidden">
+                <CardContent className="p-2 sm:p-4 text-center">
+                  <div className="text-base sm:text-2xl font-bold leading-tight">{overallPercentage}%</div>
+                  <div className="text-[9px] sm:text-xs text-muted-foreground leading-tight mt-0.5">Taxa</div>
                 </CardContent>
               </Card>
             </div>
@@ -146,27 +146,28 @@ export const LocalityComparisonChart = ({
                   Comparativo (Top {isMobile ? 8 : 15})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-2 sm:p-4">
+              <CardContent className="p-1 sm:p-4">
                 {chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={isMobile ? 280 : 350}>
+                  <ResponsiveContainer width="100%" height={isMobile ? 250 : 350}>
                     <BarChart
                       data={chartData}
                       layout="vertical"
                       margin={isMobile 
-                        ? { top: 5, right: 10, left: 5, bottom: 5 }
+                        ? { top: 5, right: 5, left: 0, bottom: 5 }
                         : { top: 5, right: 30, left: 100, bottom: 5 }
                       }
                     >
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis 
                         type="number" 
-                        tick={{ fontSize: isMobile ? 9 : 11 }}
+                        tick={{ fontSize: isMobile ? 8 : 11 }}
+                        tickCount={4}
                       />
                       <YAxis
                         type="category"
                         dataKey="displayName"
-                        width={isMobile ? 75 : 95}
-                        tick={{ fontSize: isMobile ? 9 : 11 }}
+                        width={isMobile ? 60 : 95}
+                        tick={{ fontSize: isMobile ? 8 : 11 }}
                       />
                       <Tooltip
                         contentStyle={{
