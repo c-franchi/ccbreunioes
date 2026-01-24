@@ -33,7 +33,7 @@ const Index = () => {
           musicians (*)
         `).eq('meeting_session_id', currentSession.id).order('checked_in_at', {
         ascending: false
-      });
+      }).range(0, 5000);
       if (error) {
         console.error(error);
       } else {
