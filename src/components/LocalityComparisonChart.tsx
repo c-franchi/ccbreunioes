@@ -95,10 +95,15 @@ export const LocalityComparisonChart = ({
     return name.substring(0, maxLength - 1) + "…";
   };
 
+  // Get chart height and truncation based on screen size
+  const chartHeight = isMobile ? 280 : 450;
+  const nameTruncateLength = isMobile ? 12 : 22;
+  const yAxisWidth = isMobile ? 95 : 150;
+
   // Prepare chart data with truncated names
   const chartData = topData.map((item) => ({
     ...item,
-    displayName: truncateName(item.localidade, isMobile ? 10 : 18),
+    displayName: truncateName(item.localidade, nameTruncateLength),
   }));
 
   return (
@@ -109,7 +114,7 @@ export const LocalityComparisonChart = ({
           Ver Gráfico Detalhado
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-md sm:max-w-lg max-h-[90vh] p-3 overflow-hidden">
+      <DialogContent className="w-[95vw] max-w-[400px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] max-h-[90vh] p-3 sm:p-4 overflow-hidden">
         <DialogHeader className="pb-2">
           <DialogTitle className="flex items-center gap-2 text-base">
             <TrendingUp className="w-4 h-4" />
@@ -128,26 +133,24 @@ export const LocalityComparisonChart = ({
               localidades={localidades}
             />
 
-            {/* Summary Cards - 2 columns first row, full width second */}
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <div className="text-xl font-bold">{totalFiltered}</div>
-                    <div className="text-xs text-muted-foreground">Total</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <div className="text-xl font-bold text-primary">{presentFiltered}</div>
-                    <div className="text-xs text-muted-foreground">Presentes</div>
-                  </CardContent>
-                </Card>
-              </div>
+            {/* Summary Cards - Responsive grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <Card>
-                <CardContent className="p-3 text-center">
-                  <div className="text-xl font-bold">{overallPercentage}%</div>
-                  <div className="text-xs text-muted-foreground">Taxa de Presença</div>
+                <CardContent className="p-2 sm:p-3 text-center">
+                  <div className="text-lg sm:text-xl font-bold">{totalFiltered}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Total</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-2 sm:p-3 text-center">
+                  <div className="text-lg sm:text-xl font-bold text-primary">{presentFiltered}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Presentes</div>
+                </CardContent>
+              </Card>
+              <Card className="col-span-2 sm:col-span-1">
+                <CardContent className="p-2 sm:p-3 text-center">
+                  <div className="text-lg sm:text-xl font-bold">{overallPercentage}%</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Taxa de Presença</div>
                 </CardContent>
               </Card>
             </div>
@@ -171,27 +174,27 @@ export const LocalityComparisonChart = ({
                   </Toggle>
                 </div>
               </CardHeader>
-              <CardContent className="p-2">
+              <CardContent className="p-2 sm:p-3">
                 {chartData.length > 0 ? (
-                  <div className="w-full overflow-hidden" style={{ height: isMobile ? 250 : 400 }}>
+                  <div className="w-full" style={{ height: chartHeight }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={chartData}
                         layout="vertical"
-                        margin={{ top: 5, right: 10, left: 0, bottom: 15 }}
+                        margin={{ top: 5, right: 15, left: 5, bottom: 20 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={true} vertical={false} />
                         <XAxis 
                           type="number" 
-                          tick={{ fontSize: 10 }}
-                          tickCount={4}
+                          tick={{ fontSize: isMobile ? 9 : 11 }}
+                          tickCount={5}
                           axisLine={false}
                         />
                         <YAxis
                           type="category"
                           dataKey="displayName"
-                          width={isMobile ? 85 : 120}
-                          tick={{ fontSize: isMobile ? 8 : 11 }}
+                          width={yAxisWidth}
+                          tick={{ fontSize: isMobile ? 9 : 12 }}
                           axisLine={false}
                           tickLine={false}
                         />
