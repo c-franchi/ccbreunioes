@@ -97,7 +97,12 @@ const Login = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="newPass">Senha inicial</Label>
-                  <Input id="newPass" type="password" value={newAdminPassword} onChange={(e) => setNewAdminPassword(e.target.value)} placeholder="••••••••" required />
+                  <div className="relative">
+                    <Input id="newPass" type={showNewPassword ? "text" : "password"} value={newAdminPassword} onChange={(e) => setNewAdminPassword(e.target.value)} placeholder="••••••••" required />
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowNewPassword(!showNewPassword)}>
+                      {showNewPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+                    </Button>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={creating}>
                   <UserPlus className="w-4 h-4 mr-2" />
