@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      absence_justifications: {
+        Row: {
+          cargo: string
+          created_at: string | null
+          event_id: string
+          id: string
+          localidade: string
+          motivo: string
+          musician_id: string
+        }
+        Insert: {
+          cargo: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          localidade: string
+          motivo: string
+          musician_id: string
+        }
+        Update: {
+          cargo?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          localidade?: string
+          motivo?: string
+          musician_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "absence_justifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "justification_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absence_justifications_musician_id_fkey"
+            columns: ["musician_id"]
+            isOneToOne: false
+            referencedRelation: "musicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendances: {
         Row: {
           checked_in_at: string | null
@@ -55,6 +100,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      justification_events: {
+        Row: {
+          closes_at: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          meeting_date: string
+          meeting_time: string | null
+          opens_at: string
+          status: string | null
+          title: string
+        }
+        Insert: {
+          closes_at: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          meeting_date: string
+          meeting_time?: string | null
+          opens_at: string
+          status?: string | null
+          title?: string
+        }
+        Update: {
+          closes_at?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          meeting_date?: string
+          meeting_time?: string | null
+          opens_at?: string
+          status?: string | null
+          title?: string
+        }
+        Relationships: []
       }
       meeting_sessions: {
         Row: {
@@ -179,11 +260,57 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       immutable_unaccent: { Args: { "": string }; Returns: string }
       search_musicians_by_name: {
         Args: { search_term: string }
@@ -206,7 +333,7 @@ export type Database = {
       unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -333,6 +460,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
