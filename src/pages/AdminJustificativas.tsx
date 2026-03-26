@@ -15,7 +15,7 @@ import { format, addMonths, setDate, getDay, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Plus, Calendar, Link2, Copy, FileText, LogOut, ArrowLeft, Trash2, Eye, UserPlus, ChevronDown } from "lucide-react";
+import { Plus, Calendar, Link2, Copy, FileText, LogOut, ArrowLeft, Trash2, Eye, UserPlus, ChevronDown, User } from "lucide-react";
 import { generateAbsenceReportPDF } from "@/utils/generateAbsenceReportPDF";
 
 // Calculate 4th Saturday of a given month
