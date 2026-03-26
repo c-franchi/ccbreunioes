@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Music } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Music, LogIn, LogOut, FileText, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { MusicianSearch } from "@/components/MusicianSearch";
 import { AttendanceStats } from "@/components/AttendanceStats";
 import { AttendanceList } from "@/components/AttendanceList";
@@ -10,6 +13,8 @@ import { InstrumentCountMarker } from "@/components/InstrumentCountMarker";
 import { ImportMusiciansButton } from "@/components/ImportMusiciansButton";
 import { LocalityStatsCard } from "@/components/LocalityStatsCard";
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, isAdmin, signOut } = useAuth();
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [attendances, setAttendances] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -102,6 +107,27 @@ const Index = () => {
               <p className="text-xs sm:text-sm text-primary-foreground/80 truncate">
                 Controle de Presenças - {currentSession?.meeting_name || 'Carregando...'}
               </p>
+            </div>
+            <div className="flex items-center gap-1 sm:gap-2">
+              {user && isAdmin && (
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/20 text-xs sm:text-sm">
+                    <FileText className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Justificativas</span>
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => navigate("/perfil")} className="text-primary-foreground hover:bg-primary-foreground/20">
+                    <User className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/20">
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </>
+              )}
+              {!user && (
+                <Button variant="ghost" size="icon" onClick={() => navigate("/login")} className="text-primary-foreground hover:bg-primary-foreground/20">
+                  <LogIn className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
