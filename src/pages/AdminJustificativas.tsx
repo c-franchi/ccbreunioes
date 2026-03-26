@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import { format, addMonths, setDate, getDay, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Plus, Calendar, Link2, Copy, FileText, LogOut, ArrowLeft, Trash2, Eye } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Plus, Calendar, Link2, Copy, FileText, LogOut, ArrowLeft, Trash2, Eye, UserPlus, ChevronDown } from "lucide-react";
 import { generateAbsenceReportPDF } from "@/utils/generateAbsenceReportPDF";
 
 // Calculate 4th Saturday of a given month
@@ -276,10 +277,11 @@ const AdminJustificativas = () => {
               <p className="text-muted-foreground text-sm text-center py-4">Nenhum evento criado</p>
             ) : (
               <div className="space-y-3">
-                {events.map((event) => {
+                {/* Open events shown first, prominently */}
+                {events.filter(e => getEventStatus(e).label === "Aberto").map((event) => {
                   const status = getEventStatus(event);
                   return (
-                    <div key={event.id} className="border rounded-lg p-4 space-y-2">
+                    <div key={event.id} className="border-2 border-primary rounded-lg p-4 space-y-2 bg-primary/5">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium text-sm">{event.title}</p>
@@ -303,6 +305,48 @@ const AdminJustificativas = () => {
                     </div>
                   );
                 })}
+
+                {/* Remaining events in accordion */}
+                {events.filter(e => getEventStatus(e).label !== "Aberto").length > 0 && (
+                  <Accordion type="single" collapsible>
+                    <AccordionItem value="other-events" className="border-none">
+                      <AccordionTrigger className="text-sm font-medium text-muted-foreground hover:no-underline py-2">
+                        Demais eventos ({events.filter(e => getEventStatus(e).label !== "Aberto").length})
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-3 pt-2">
+                          {events.filter(e => getEventStatus(e).label !== "Aberto").map((event) => {
+                            const status = getEventStatus(event);
+                            return (
+                              <div key={event.id} className="border rounded-lg p-4 space-y-2">
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <p className="font-medium text-sm">{event.title}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {format(new Date(event.meeting_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })} às {event.meeting_time?.slice(0, 5)}
+                                    </p>
+                                  </div>
+                                  <Badge variant={status.variant}>{status.label}</Badge>
+                                </div>
+                                <div className="flex gap-2 flex-wrap">
+                                  <Button size="sm" variant="outline" onClick={() => copyLink(event.id)}>
+                                    <Copy className="w-3 h-3 mr-1" />Link
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={() => viewJustifications(event)}>
+                                    <Eye className="w-3 h-3 mr-1" />Ver Justificativas
+                                  </Button>
+                                  <Button size="sm" variant="destructive" onClick={() => deleteEvent(event.id)}>
+                                    <Trash2 className="w-3 h-3 mr-1" />Excluir
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
               </div>
             )}
           </CardContent>

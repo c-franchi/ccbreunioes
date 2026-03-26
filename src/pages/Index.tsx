@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Music, LogIn, LogOut, FileText, User } from "lucide-react";
+import { Music, LogIn, LogOut, FileText, User, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MusicianSearch } from "@/components/MusicianSearch";
 import { AttendanceStats } from "@/components/AttendanceStats";
@@ -117,10 +117,18 @@ const Index = () => {
               {loading ? null : user ? (
                 <>
                   {isAdmin && (
-                    <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/20 text-xs sm:text-sm">
-                      <FileText className="w-4 h-4 sm:mr-1" />
-                      <span className="hidden sm:inline">Justificativas</span>
-                    </Button>
+                    <>
+                      <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/20 text-xs sm:text-sm">
+                        <FileText className="w-4 h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Justificativas</span>
+                      </Button>
+                      {user?.email === "neifranchi@gmail.com" && (
+                        <Button variant="ghost" size="sm" onClick={() => navigate("/login")} className="text-primary-foreground hover:bg-primary-foreground/20 text-xs sm:text-sm" title="Gerenciar Administradores">
+                          <UserPlus className="w-4 h-4 sm:mr-1" />
+                          <span className="hidden sm:inline">Admins</span>
+                        </Button>
+                      )}
+                    </>
                   )}
                   <Button variant="ghost" size="icon" onClick={() => navigate("/perfil")} className="text-primary-foreground hover:bg-primary-foreground/20" title="Perfil">
                     <User className="w-4 h-4" />
