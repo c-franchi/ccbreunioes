@@ -109,22 +109,23 @@ const Index = () => {
               </p>
             </div>
             <div className="flex items-center gap-1 sm:gap-2">
-              {user && isAdmin && (
+              {user ? (
                 <>
-                  <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/20 text-xs sm:text-sm">
-                    <FileText className="w-4 h-4 sm:mr-1" />
-                    <span className="hidden sm:inline">Justificativas</span>
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => navigate("/perfil")} className="text-primary-foreground hover:bg-primary-foreground/20">
+                  {isAdmin && (
+                    <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/20 text-xs sm:text-sm">
+                      <FileText className="w-4 h-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Justificativas</span>
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={() => navigate("/perfil")} className="text-primary-foreground hover:bg-primary-foreground/20" title="Perfil">
                     <User className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/20">
+                  <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/20" title="Sair">
                     <LogOut className="w-4 h-4" />
                   </Button>
                 </>
-              )}
-              {!user && (
-                <Button variant="ghost" size="icon" onClick={() => navigate("/login")} className="text-primary-foreground hover:bg-primary-foreground/20">
+              ) : (
+                <Button variant="ghost" size="icon" onClick={() => navigate("/login")} className="text-primary-foreground hover:bg-primary-foreground/20" title="Entrar">
                   <LogIn className="w-4 h-4" />
                 </Button>
               )}
