@@ -15,7 +15,7 @@ import { format, addMonths, setDate, getDay, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Plus, Calendar, Link2, Copy, FileText, LogOut, ArrowLeft, Trash2, Eye, UserPlus, ChevronDown, User } from "lucide-react";
+import { Plus, Calendar, Link2, Copy, FileText, LogOut, ArrowLeft, Trash2, Eye, UserPlus, ChevronDown, User, Share2 } from "lucide-react";
 import { generateAbsenceReportPDF } from "@/utils/generateAbsenceReportPDF";
 
 // Calculate 4th Saturday of a given month
@@ -159,6 +159,12 @@ const AdminJustificativas = () => {
     const link = `${window.location.origin}/justificar/${eventId}`;
     navigator.clipboard.writeText(link);
     toast.success("Link copiado para a área de transferência!");
+  };
+
+  const shareWhatsApp = (eventId: string, title: string) => {
+    const link = `${window.location.origin}/justificar/${eventId}`;
+    const message = `📋 *${title}*\n\nJustifique sua ausência pelo link abaixo:\n${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const viewJustifications = async (event: any) => {
@@ -305,6 +311,9 @@ const AdminJustificativas = () => {
                         <Button size="sm" variant="outline" onClick={() => copyLink(event.id)}>
                           <Copy className="w-3 h-3 mr-1" />Link
                         </Button>
+                        <Button size="sm" variant="outline" onClick={() => shareWhatsApp(event.id, event.title)} className="text-green-600 border-green-600 hover:bg-green-50">
+                          <Share2 className="w-3 h-3 mr-1" />WhatsApp
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => viewJustifications(event)}>
                           <Eye className="w-3 h-3 mr-1" />Ver Justificativas
                         </Button>
@@ -341,6 +350,9 @@ const AdminJustificativas = () => {
                                 <div className="flex gap-2 flex-wrap">
                                   <Button size="sm" variant="outline" onClick={() => copyLink(event.id)}>
                                     <Copy className="w-3 h-3 mr-1" />Link
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={() => shareWhatsApp(event.id, event.title)} className="text-green-600 border-green-600 hover:bg-green-50">
+                                    <Share2 className="w-3 h-3 mr-1" />WhatsApp
                                   </Button>
                                   <Button size="sm" variant="outline" onClick={() => viewJustifications(event)}>
                                     <Eye className="w-3 h-3 mr-1" />Ver Justificativas
