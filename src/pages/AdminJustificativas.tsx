@@ -161,6 +161,12 @@ const AdminJustificativas = () => {
     toast.success("Link copiado para a área de transferência!");
   };
 
+  const shareWhatsApp = (eventId: string, title: string) => {
+    const link = `${window.location.origin}/justificar/${eventId}`;
+    const message = `📋 *${title}*\n\nJustifique sua ausência pelo link abaixo:\n${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
   const viewJustifications = async (event: any) => {
     setViewingEvent(event);
     setLoadingJustifications(true);
