@@ -311,6 +311,9 @@ const AdminJustificativas = () => {
                         <Button size="sm" variant="outline" onClick={() => copyLink(event.id)}>
                           <Copy className="w-3 h-3 mr-1" />Link
                         </Button>
+                        <Button size="sm" variant="outline" onClick={() => shareWhatsApp(event.id, event.title)} className="text-green-600 border-green-600 hover:bg-green-50">
+                          <Share2 className="w-3 h-3 mr-1" />WhatsApp
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => viewJustifications(event)}>
                           <Eye className="w-3 h-3 mr-1" />Ver Justificativas
                         </Button>
@@ -347,6 +350,9 @@ const AdminJustificativas = () => {
                                 <div className="flex gap-2 flex-wrap">
                                   <Button size="sm" variant="outline" onClick={() => copyLink(event.id)}>
                                     <Copy className="w-3 h-3 mr-1" />Link
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={() => shareWhatsApp(event.id, event.title)} className="text-green-600 border-green-600 hover:bg-green-50">
+                                    <Share2 className="w-3 h-3 mr-1" />WhatsApp
                                   </Button>
                                   <Button size="sm" variant="outline" onClick={() => viewJustifications(event)}>
                                     <Eye className="w-3 h-3 mr-1" />Ver Justificativas
