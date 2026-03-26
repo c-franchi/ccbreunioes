@@ -67,8 +67,39 @@ const AdminJustificativas = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user && isAdmin) loadEvents();
+    if (user && isAdmin) {
+      autoGenerateEvents().then(() => loadEvents());
+    }
   }, [user, isAdmin]);
+
+  const autoGenerateEvents = async () => {
+    const dates = getUpcomingMeetingDates();
+    for (const d of dates) {
+      const dateStr = format(d, "yyyy-MM-dd");
+      // Check if event already exists for this date
+      const { data: existing } = await supabase
+        .from("justification_events")
+        .select("id")
+        .eq("meeting_date", dateStr)
+        .maybeSingle();
+      if (existing) continue;
+
+      const opensAt = new Date(d);
+      opensAt.setDate(opensAt.getDate() - 2);
+      opensAt.setHours(0, 0, 0, 0);
+      const closesAt = new Date(d);
+      closesAt.setHours(15, 30, 0, 0);
+
+      await supabase.from("justification_events").insert({
+        title: `Justificativas Ausência - Reunião Bimestral ${format(d, "MMMM/yyyy", { locale: ptBR })}`,
+        meeting_date: dateStr,
+        meeting_time: "15:00",
+        opens_at: opensAt.toISOString(),
+        closes_at: closesAt.toISOString(),
+        created_by: user?.id,
+      });
+    }
+  };
 
   const loadEvents = async () => {
     const { data, error } = await supabase
