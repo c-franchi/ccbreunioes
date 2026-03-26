@@ -149,7 +149,7 @@ const JustificarAusencia = () => {
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-6 space-y-4">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+            <CheckCircle className="w-16 h-16 text-primary mx-auto" />
             <h2 className="text-xl font-bold">Justificativa Enviada!</h2>
             <p className="text-muted-foreground text-sm">
               Sua justificativa de ausência foi registrada com sucesso.
@@ -178,7 +178,7 @@ const JustificarAusencia = () => {
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-6 space-y-4">
-            <Clock className="w-16 h-16 text-yellow-500 mx-auto" />
+            <Clock className="w-16 h-16 text-accent-foreground mx-auto" />
             <h2 className="text-lg font-bold">{event.title}</h2>
             <p className="text-sm text-muted-foreground">
               Reunião: {format(new Date(event.meeting_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })} às {event.meeting_time?.slice(0, 5)}
