@@ -14,7 +14,12 @@ import { ImportMusiciansButton } from "@/components/ImportMusiciansButton";
 import { LocalityStatsCard } from "@/components/LocalityStatsCard";
 const Index = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, loading, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [attendances, setAttendances] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -109,7 +114,7 @@ const Index = () => {
               </p>
             </div>
             <div className="flex items-center gap-1 sm:gap-2">
-              {user ? (
+              {loading ? null : user ? (
                 <>
                   {isAdmin && (
                     <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/20 text-xs sm:text-sm">
@@ -120,7 +125,7 @@ const Index = () => {
                   <Button variant="ghost" size="icon" onClick={() => navigate("/perfil")} className="text-primary-foreground hover:bg-primary-foreground/20" title="Perfil">
                     <User className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/20" title="Sair">
+                  <Button variant="ghost" size="icon" onClick={handleSignOut} className="text-primary-foreground hover:bg-primary-foreground/20" title="Sair">
                     <LogOut className="w-4 h-4" />
                   </Button>
                 </>
