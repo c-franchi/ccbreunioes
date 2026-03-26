@@ -106,7 +106,7 @@ const AdminJustificativas = () => {
     const { data, error } = await supabase
       .from("justification_events")
       .select("*")
-      .order("meeting_date", { ascending: false });
+      .order("meeting_date", { ascending: true });
     if (!error) setEvents(data || []);
   };
 
