@@ -15,7 +15,7 @@ import { format, addMonths, setDate, getDay, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Plus, Calendar, Link2, Copy, FileText, LogOut, ArrowLeft, Trash2, Eye, UserPlus, ChevronDown } from "lucide-react";
+import { Plus, Calendar, Link2, Copy, FileText, LogOut, ArrowLeft, Trash2, Eye, UserPlus, ChevronDown, User } from "lucide-react";
 import { generateAbsenceReportPDF } from "@/utils/generateAbsenceReportPDF";
 
 // Calculate 4th Saturday of a given month
@@ -212,10 +212,20 @@ const AdminJustificativas = () => {
               <p className="text-sm text-primary-foreground/80">Painel Administrativo</p>
             </div>
           </div>
-          <Button variant="ghost" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/20">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-1 sm:gap-2">
+            {user?.email === "neifranchi@gmail.com" && (
+              <Button variant="ghost" size="sm" onClick={() => navigate("/login")} className="text-primary-foreground hover:bg-primary-foreground/20 text-xs sm:text-sm" title="Gerenciar Administradores">
+                <UserPlus className="w-4 h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Admins</span>
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" onClick={() => navigate("/perfil")} className="text-primary-foreground hover:bg-primary-foreground/20" title="Perfil">
+              <User className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => { signOut(); navigate("/"); }} className="text-primary-foreground hover:bg-primary-foreground/20" title="Sair">
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
