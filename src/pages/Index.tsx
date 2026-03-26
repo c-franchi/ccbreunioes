@@ -14,7 +14,12 @@ import { ImportMusiciansButton } from "@/components/ImportMusiciansButton";
 import { LocalityStatsCard } from "@/components/LocalityStatsCard";
 const Index = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, loading, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [attendances, setAttendances] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);

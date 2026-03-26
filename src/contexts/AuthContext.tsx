@@ -21,37 +21,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const checkAdmin = async (userId: string) => {
-    const { data } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
-    setIsAdmin(!!data);
+    try {
+      const { data } = await supabase.rpc("has_role", {
+        _user_id: userId,
+        _role: "admin",
+      });
+      setIsAdmin(!!data);
+    } catch {
+      setIsAdmin(false);
+    }
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkAdmin(session.user.id);
-        } else {
-          setIsAdmin(false);
-        }
-        setLoading(false);
-      }
-    );
+    let mounted = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // First get the current session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        checkAdmin(session.user.id);
+        await checkAdmin(session.user.id);
       }
-      setLoading(false);
+      if (mounted) setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Then listen for changes - NO await inside callback
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!mounted) return;
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Use setTimeout to avoid deadlock with Supabase auth
+          setTimeout(() => {
+            if (mounted) checkAdmin(session.user.id);
+          }, 0);
+        } else {
+          setIsAdmin(false);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -69,10 +85,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    setIsAdmin(false);
     setUser(null);
     setSession(null);
-    setIsAdmin(false);
+    await supabase.auth.signOut();
   };
 
   return (
