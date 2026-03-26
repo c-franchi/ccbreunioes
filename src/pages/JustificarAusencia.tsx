@@ -39,49 +39,70 @@ const JustificarAusencia = () => {
   }, [eventId]);
 
   const loadEvent = async () => {
-    if (!eventId) return;
-    const { data, error } = await supabase
-      .from("justification_events")
-      .select("*")
-      .eq("id", eventId)
-      .single();
-    
-    if (error || !data) {
+    if (!eventId) {
       setError("Evento não encontrado");
       setLoading(false);
       return;
     }
+    try {
+      const { data, error } = await supabase
+        .from("justification_events")
+        .select("*")
+        .eq("id", eventId)
+        .maybeSingle();
+      
+      if (error) {
+        console.error("Error loading event:", error);
+        setError("Evento não encontrado");
+        setLoading(false);
+        return;
+      }
 
-    const now = new Date();
-    const opens = new Date(data.opens_at);
-    const closes = new Date(data.closes_at);
+      if (!data) {
+        setError("Evento não encontrado");
+        setLoading(false);
+        return;
+      }
 
-    if (now < opens) {
-      setError(`Este formulário abrirá em ${format(opens, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`);
+      const now = new Date();
+      const opens = new Date(data.opens_at);
+      const closes = new Date(data.closes_at);
+
+      if (now < opens) {
+        setError(`Este formulário abrirá em ${format(opens, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`);
+        setEvent(data);
+        setLoading(false);
+        return;
+      }
+
+      if (now > closes) {
+        setError("O prazo para justificativas foi encerrado");
+        setEvent(data);
+        setLoading(false);
+        return;
+      }
+
       setEvent(data);
       setLoading(false);
-      return;
-    }
-
-    if (now > closes) {
-      setError("O prazo para justificativas foi encerrado");
-      setEvent(data);
+    } catch (err) {
+      console.error("Exception loading event:", err);
+      setError("Erro ao carregar evento");
       setLoading(false);
-      return;
     }
-
-    setEvent(data);
-    setLoading(false);
   };
 
   const loadMusicians = async () => {
-    const { data } = await supabase
-      .from("musicians")
-      .select("*")
-      .in("cargo_ministerio", CARGOS_ENCARREGADOS.map(c => c.toUpperCase()))
-      .order("name");
-    
-    if (data) setMusicians(data);
+    try {
+      const { data } = await supabase
+        .from("musicians")
+        .select("*")
+        .in("cargo_ministerio", CARGOS_ENCARREGADOS.map(c => c.toUpperCase()))
+        .order("name");
+      
+      if (data) setMusicians(data);
+    } catch (err) {
+      console.error("Error loading musicians:", err);
+    }
   };
 
   // Filter musicians by selected cargo
