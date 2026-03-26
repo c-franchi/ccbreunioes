@@ -1,0 +1,1 @@
+DELETE FROM musicians WHERE name = 'Nilza Scache Lopes';
