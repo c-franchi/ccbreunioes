@@ -54,6 +54,8 @@ const AdminJustificativas = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [customTitle, setCustomTitle] = useState("Justificativas Ausência - Reunião Bimestral de Encarregados Microrregião Araraquara");
+  const [customTime, setCustomTime] = useState("15:00");
   const [creating, setCreating] = useState(false);
   const [viewingEvent, setViewingEvent] = useState<any>(null);
   const [justifications, setJustifications] = useState<any[]>([]);
@@ -115,21 +117,27 @@ const AdminJustificativas = () => {
       toast.error("Selecione a data da reunião");
       return;
     }
+    if (!customTitle.trim()) {
+      toast.error("Informe o título da reunião");
+      return;
+    }
     setCreating(true);
-    
+
+    const [h, m] = (customTime || "15:00").split(":").map(Number);
+
     // Opens 2 days before at 00:00
     const opensAt = new Date(selectedDate);
     opensAt.setDate(opensAt.getDate() - 2);
     opensAt.setHours(0, 0, 0, 0);
-    
-    // Closes at 15:30 on meeting day
+
+    // Closes 30 minutes after the meeting starts
     const closesAt = new Date(selectedDate);
-    closesAt.setHours(15, 30, 0, 0);
+    closesAt.setHours(h || 15, (m || 0) + 30, 0, 0);
 
     const { error } = await supabase.from("justification_events").insert({
-      title: "Justificativas Ausência - Reunião Bimestral de Encarregados Microrregião Araraquara",
+      title: customTitle.trim(),
       meeting_date: format(selectedDate, "yyyy-MM-dd"),
-      meeting_time: "15:00",
+      meeting_time: customTime || "15:00",
       opens_at: opensAt.toISOString(),
       closes_at: closesAt.toISOString(),
       created_by: user?.id,
@@ -253,11 +261,16 @@ const AdminJustificativas = () => {
                     <DialogTitle>Criar Evento de Justificativa</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Reunião Bimestral de Encarregados - Microrregião Araraquara
-                    </p>
                     <div className="space-y-2">
-                      <Label>Selecione a data da reunião (4º Sábado)</Label>
+                      <Label>Título da reunião</Label>
+                      <Input
+                        value={customTitle}
+                        onChange={(e) => setCustomTitle(e.target.value)}
+                        placeholder="Ex: Reunião Técnica com Organistas"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Datas sugeridas (4º Sábado)</Label>
                       <div className="grid grid-cols-2 gap-2">
                         {meetingDates.map((d) => (
                           <Button
@@ -272,14 +285,29 @@ const AdminJustificativas = () => {
                         ))}
                       </div>
                     </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label>Outra data</Label>
+                        <Input
+                          type="date"
+                          value={selectedDate ? format(selectedDate, "yyyy-MM-dd") : ""}
+                          onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value + "T12:00:00") : undefined)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Horário</Label>
+                        <Input type="time" value={customTime} onChange={(e) => setCustomTime(e.target.value)} />
+                      </div>
+                    </div>
                     {selectedDate && (
                       <div className="bg-muted p-3 rounded-md text-sm space-y-1">
                         <p><strong>Data:</strong> {format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
-                        <p><strong>Horário:</strong> 15:00</p>
+                        <p><strong>Horário:</strong> {customTime}</p>
                         <p><strong>Abre para justificativas:</strong> {format(new Date(selectedDate.getTime() - 2 * 24 * 60 * 60 * 1000), "dd/MM/yyyy")} às 00:00</p>
-                        <p><strong>Fecha:</strong> {format(selectedDate, "dd/MM/yyyy")} às 15:30</p>
+                        <p><strong>Fecha:</strong> {format(selectedDate, "dd/MM/yyyy")} 30 min após o início</p>
                       </div>
                     )}
+
                     <Button onClick={createEvent} disabled={creating || !selectedDate} className="w-full">
                       {creating ? "Criando..." : "Criar Evento"}
                     </Button>
