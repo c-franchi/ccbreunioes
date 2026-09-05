@@ -54,6 +54,8 @@ const AdminJustificativas = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [customTitle, setCustomTitle] = useState("Justificativas Ausência - Reunião Bimestral de Encarregados Microrregião Araraquara");
+  const [customTime, setCustomTime] = useState("15:00");
   const [creating, setCreating] = useState(false);
   const [viewingEvent, setViewingEvent] = useState<any>(null);
   const [justifications, setJustifications] = useState<any[]>([]);
