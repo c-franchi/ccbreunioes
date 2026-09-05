@@ -117,21 +117,27 @@ const AdminJustificativas = () => {
       toast.error("Selecione a data da reunião");
       return;
     }
+    if (!customTitle.trim()) {
+      toast.error("Informe o título da reunião");
+      return;
+    }
     setCreating(true);
-    
+
+    const [h, m] = (customTime || "15:00").split(":").map(Number);
+
     // Opens 2 days before at 00:00
     const opensAt = new Date(selectedDate);
     opensAt.setDate(opensAt.getDate() - 2);
     opensAt.setHours(0, 0, 0, 0);
-    
-    // Closes at 15:30 on meeting day
+
+    // Closes 30 minutes after the meeting starts
     const closesAt = new Date(selectedDate);
-    closesAt.setHours(15, 30, 0, 0);
+    closesAt.setHours(h || 15, (m || 0) + 30, 0, 0);
 
     const { error } = await supabase.from("justification_events").insert({
-      title: "Justificativas Ausência - Reunião Bimestral de Encarregados Microrregião Araraquara",
+      title: customTitle.trim(),
       meeting_date: format(selectedDate, "yyyy-MM-dd"),
-      meeting_time: "15:00",
+      meeting_time: customTime || "15:00",
       opens_at: opensAt.toISOString(),
       closes_at: closesAt.toISOString(),
       created_by: user?.id,
