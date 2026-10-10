@@ -26,6 +26,22 @@ const Login = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
 
   const isSuperAdmin = user?.email === "neifranchi@gmail.com";
+  const [sendingReset, setSendingReset] = useState(false);
+
+  const handleForgot = async () => {
+    const target = email.trim();
+    if (!target) {
+      toast.error("Digite seu email no campo acima e clique novamente em \"Esqueci minha senha\"");
+      return;
+    }
+    setSendingReset(true);
+    await supabase.auth.resetPasswordForEmail(target, {
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    });
+    // Mensagem genérica: não revela se o email está cadastrado
+    toast.success("Se este email estiver cadastrado, você receberá um link para redefinir a senha.");
+    setSendingReset(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,6 +171,11 @@ const Login = () => {
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
+          <div className="mt-4 text-center">
+            <Button type="button" variant="link" className="text-sm" onClick={handleForgot} disabled={sendingReset}>
+              {sendingReset ? "Enviando..." : "Esqueci minha senha"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

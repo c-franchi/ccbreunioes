@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import AdminJustificativas from "./pages/AdminJustificativas";
 import JustificarAusencia from "./pages/JustificarAusencia";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/analise-localidade" element={<LocalityAnalysis />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/perfil" element={<Profile />} />
               <Route path="/admin" element={<AdminJustificativas />} />
               <Route path="/justificar/:eventId" element={<JustificarAusencia />} />
